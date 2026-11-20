@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>归零法则 · ZERO AXIOM</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23F4F3EE'/%3E%3Ccircle cx='16' cy='16' r='10' fill='%230055FF' stroke='%23111315' stroke-width='2'/%3E%3Ccircle cx='22' cy='10' r='3.5' fill='%23E63312'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- ══════════ HUD ══════════ -->
+<div id="hud" class="hidden">
+  <div class="hud-tl">
+    <div class="hp-meta">
+      <span class="hp-tag">HP</span>
+      <span id="hpLabel">100 / 100</span>
+    </div>
+    <div class="bar hp">
+      <div class="fill" id="hpFill"></div>
+    </div>
+    <div class="bar xp">
+      <div class="fill" id="xpFill"></div>
+    </div>
+    <div class="xp-meta">
+      <span class="lv" id="lvLabel">LV.01</span>
+      <span id="xpLabel">0 / 6</span>
+    </div>
+    <div class="core-tier" id="tierBadge">CORE I · 单发 1</div>
+  </div>
+
+  <div class="hud-tc">
+    <div class="clock" id="clock">00:00</div>
+    <div class="threat" id="threat">威胁等级 1 · 剩余 06:00</div>
+  </div>
+
+  <div class="hud-tr">
+    <div class="kpi"><b id="kills">0</b><span>击杀</span></div>
+    <div class="kpi"><b id="dps">0</b><span>秒伤</span></div>
+    <div class="hud-actions">
+      <button class="hud-btn" id="btnMute" title="静音 (M)">M</button>
+      <button class="hud-btn" id="btnPauseHud" title="暂停 (P)">P</button>
+    </div>
+  </div>
+
+  <div class="bossbar hidden" id="bossbar">
+    <div class="boss-name" id="bossName">秩序核心</div>
+    <div class="boss-track"><div class="boss-fill" id="bossFill"></div></div>
+  </div>
+
+  <div class="dock" id="dock"></div>
+
+  <div class="tip" id="tip">WASD 移动 · 自动射击 · 空格冲刺</div>
+
+  <div class="dashbox" id="dashbox">
+    <svg viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r="18" class="t"></circle>
+      <circle cx="22" cy="22" r="18" class="f" id="dashArc"></circle>
+    </svg>
+    <span id="dashLabel">冲刺</span>
+    <i class="dash-charges hidden" id="dashCharges">2</i>
+  </div>
+</div>
+
+<!-- ══════════ 标题 ══════════ -->
+<div class="screen" id="screenTitle">
+  <div class="panel title-panel">
+    <div class="swiss-meta">
+      <span>ZERO AXIOM</span>
+      <span>SYS / 02</span>
+      <span>06:00 SURVIVAL</span>
+    </div>
+
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <div class="brand-ball" id="brandBall"></div>
+        <div class="brand-dot"></div>
+      </div>
+      <div class="brand-text">
+        <h1>归零法则</h1>
+        <p class="tag">ZERO AXIOM · 极简几何生存</p>
+      </div>
+    </div>
+
+    <p class="lead">选择不同几何核心，体验台球碰撞、精准归零与觉醒构筑。<br><em>抵御 6 分钟浪潮或击破终局主宰即为胜利</em></p>
+
+    <div class="orb-block">
+      <div class="diff-head">
+        <span>CORE UNIT · 球体选择</span>
+        <span class="diff-summary" id="orbSummary">疾影球 · 相位冲刺</span>
+      </div>
+      <div class="orb-grid" id="orbGrid"></div>
+    </div>
+
+    <div class="diff-block">
+      <div class="diff-head">
+        <span>DIFFICULTY · 难度选择</span>
+        <span class="diff-summary" id="diffSummary">标准 · 平衡节奏</span>
+      </div>
+      <div class="diff-grid" id="diffGrid"></div>
+    </div>
+
+    <div class="keys">
+      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><em>移动</em></div>
+      <div><kbd>空格</kbd><em>球体技能</em></div>
+      <div><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><em>选难度 / 强化</em></div>
+      <div><kbd>P</kbd><em>暂停</em><kbd>M</kbd><em>静音</em></div>
+    </div>
+
+    <div class="title-foot">
+      <button class="btn" id="btnStart">开始游戏</button>
+      <div class="record" id="record">最佳存活 00:00 · 最高击杀 0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 升级 / 遗物 ══════════ -->
+<div class="screen frosted hidden" id="screenLevel">
+  <div class="lv-head" id="lvHead">
+    <div class="lv-title" id="lvTitle">SYSTEM UPGRADE</div>
+    <div class="lv-sub" id="lvSub">LV.<b id="lvNum">02</b> · 选择一项强化模块</div>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div class="lv-foot">点击卡片，或按 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 选择</div>
+</div>
+
+<!-- ══════════ 暂停 ══════════ -->
+<div class="screen frosted hidden" id="screenPause">
+  <div class="panel small modal-card">
+    <div class="swiss-meta">
+      <span>PAUSED</span>
+      <span>STATUS REPORT</span>
+    </div>
+    <h2>已暂停</h2>
+    <div class="stats" id="pauseStats"></div>
+    <div class="btn-row">
+      <button class="btn" id="btnResume">继续</button>
+      <button class="btn ghost" id="btnQuit">放弃本局</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 结算 ══════════ -->
+<div class="screen frosted hidden" id="screenOver">
+  <div class="panel modal-card">
+    <div class="swiss-meta">
+      <span>RUN SUMMARY</span>
+      <span>FINAL TELEMETRY</span>
+    </div>
+    <h2 id="overTitle">核心解体</h2>
+    <p class="over-sub" id="overSub">你被数值洪流吞没了</p>
+    <div class="stats" id="overStats"></div>
+    <div class="build" id="overBuild"></div>
+    <div class="btn-row">
+      <button class="btn" id="btnAgain">再来一局</button>
+      <button class="btn ghost" id="btnTitle">返回标题</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

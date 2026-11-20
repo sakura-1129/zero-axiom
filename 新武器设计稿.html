@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>球球肉鸽 · 新武器设计图册 v2.0</title>
+<style>
+:root {
+  --paper:   #F2EFE6;
+  --paper-2: #E9E6DC;
+  --surface: #FBFAF6;
+  --ink:     #111315;
+  --ink-60:  #474C55;
+  --ink-30:  #8C929B;
+  --ink-12:  #C6C3B8;
+  --line:      rgba(17, 19, 21, .16);
+  --line-mid:  rgba(17, 19, 21, .26);
+  --line-hard: rgba(17, 19, 21, .52);
+
+  --xian:   #0E8C63;
+  --norse:  #2E2A78;
+  --xuan:   #E63312;
+  --arcane: #C2700A;
+  --cobalt: #0055FF;
+  --brass:  #B37B00;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body { display: flex; flex-direction: column; overflow: hidden; }
+
+/* ════════ 顶栏 ════════ */
+.topbar {
+  flex: 0 0 auto;
+  display: flex; align-items: stretch; justify-content: space-between;
+  gap: 16px; padding: 11px 18px;
+  border-bottom: 1px solid var(--line-hard);
+  background: var(--surface);
+}
+.tb-left { display: flex; align-items: center; gap: 14px; }
+.swiss-tag {
+  font-size: 10px; font-weight: 800; letter-spacing: 2.4px;
+  padding: 4px 8px; background: var(--ink); color: #fff; border-radius: 2px;
+}
+.tb-title h1 { font-size: 16px; font-weight: 800; letter-spacing: .6px; }
+.tb-title p { font-size: 10.5px; color: var(--ink-30); letter-spacing: 1.4px; margin-top: 2px; font-weight: 600; }
+.tb-right { display: flex; align-items: center; gap: 10px; }
+.tb-meta {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.6px; color: var(--ink-60);
+  border-left: 1px solid var(--line); padding-left: 12px; line-height: 1.6;
+}
+.tb-meta b { color: var(--ink); }
+.btn-ctl {
+  cursor: pointer; border: 1px solid var(--line-hard); background: var(--surface);
+  color: var(--ink); font-size: 11px; font-weight: 800; letter-spacing: .8px;
+  padding: 7px 12px; border-radius: 3px; transition: all .14s ease;
+}
+.btn-ctl:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn-ctl.on { background: var(--cobalt); color: #fff; border-color: var(--cobalt); }
+.phase {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1.4px;
+  padding: 5px 9px; border-radius: 2px;
+  background: rgba(230,51,18,.10); color: var(--xuan); border: 1px solid rgba(230,51,18,.30);
+}
+
+/* 印刷控制条：印刷品色标的符号 */
+.control-bar {
+  flex: 0 0 auto; height: 5px; display: flex;
+  background: var(--ink);
+}
+.control-bar i { display: block; height: 5px; }
+.control-bar i:nth-child(1) { flex: 0 0 120px; background: var(--cobalt); }
+.control-bar i:nth-child(2) { flex: 0 0 92px;  background: var(--xuan); }
+.control-bar i:nth-child(3) { flex: 0 0 70px;  background: var(--xian); }
+.control-bar i:nth-child(4) { flex: 0 0 54px;  background: var(--norse); }
+.control-bar i:nth-child(5) { flex: 0 0 40px;  background: var(--arcane); }
+.control-bar i:nth-child(6) { flex: 0 0 26px;  background: var(--ink); }
+.control-bar i:nth-child(7) { flex: 1 1 auto; background: var(--ink-12); }
+
+/* ════════ 主体 ════════ */
+.main { flex: 1 1 auto; display: flex; min-height: 0; }
+
+/* ── 侧栏 ── */
+.side {
+  flex: 0 0 320px; overflow-y: auto;
+  border-right: 1px solid var(--line-hard);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+}
+.sec { border-bottom: 1px solid var(--line); }
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 16px 9px;
+  font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--ink-60);
+  background: rgba(236, 234, 226, .5);
+}
+.sec-head em { font-style: normal; color: var(--ink-30); font-size: 9px; letter-spacing: 1.2px; }
+.sec-body { padding: 12px 16px 16px; }
+
+.wlist { display: flex; flex-direction: column; }
+.witem {
+  cursor: pointer; text-align: left; width: 100%;
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent, var(--ink));
+  border-radius: 3px; padding: 9px 11px; margin-bottom: 7px;
+  transition: all .15s ease; display: block;
+}
+.witem:hover { border-color: var(--accent, var(--ink)); transform: translateX(2px); }
+.witem.on { background: #fff; border-color: var(--accent, var(--ink)); box-shadow: 0 5px 16px rgba(17,19,21,.10); }
+.witem-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+.witem-no { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; color: var(--accent, var(--ink)); font-variant-numeric: tabular-nums; }
+.witem-key { font-size: 9.5px; font-weight: 800; color: var(--ink-30); letter-spacing: 1px; }
+.witem-name { font-size: 13.5px; font-weight: 800; letter-spacing: .4px; }
+.witem-sub { font-size: 10.5px; color: var(--ink-30); margin-top: 2px; letter-spacing: .3px; }
+
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.sw { border: 1px solid var(--line-mid); border-radius: 2px; overflow: hidden; background: #fff; }
+.sw-chip { height: 26px; }
+.sw-lab { font-size: 8.5px; font-weight: 800; letter-spacing: .4px; text-align: center; padding: 3px 1px; font-variant-numeric: tabular-nums; color: var(--ink-60); }
+
+/* 印刷色卡条 */
+.inkbars { display: flex; flex-direction: column; gap: 3px; }
+.inkbar { display: flex; align-items: stretch; height: 24px; }
+.inkbar i { display: block; width: 26px; flex: 0 0 26px; }
+.inkbar span {
+  flex: 1 1 auto; display: flex; align-items: center; gap: 8px;
+  padding-left: 9px; font-size: 10px; font-weight: 700; color: var(--ink-60);
+  background: var(--paper-2); letter-spacing: .4px;
+}
+.inkbar em { font-style: normal; margin-left: auto; padding-right: 9px; font-size: 9.5px; font-variant-numeric: tabular-nums; color: var(--ink-30); }
+
+.lwrows { display: flex; flex-direction: column; gap: 7px; }
+.lwrow { display: flex; align-items: center; gap: 10px; }
+.lwrow i { display: block; height: 0; border-top-style: solid; border-color: var(--ink); flex: 0 0 62px; }
+.lwrow span { font-size: 10px; color: var(--ink-60); font-weight: 600; letter-spacing: .3px; }
+
+.motifs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.motif { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 4px; }
+.motif canvas { display: block; width: 100%; height: auto; }
+
+.rules { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.rules li { font-size: 10.5px; line-height: 1.5; color: var(--ink-60); display: flex; gap: 7px; }
+.rules li::before { content: "—"; color: var(--ink-30); flex: 0 0 auto; }
+.rules li b { color: var(--ink); font-weight: 800; }
+.bans { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.bans li { font-size: 10.5px; line-height: 1.45; color: var(--ink-60); border-left: 2px solid var(--xuan); padding-left: 8px; }
+.bans li b { color: var(--xuan); font-weight: 800; }
+
+/* ── 图纸区 ── */
+.sheet { flex: 1 1 auto; overflow-y: auto; padding: 20px 24px 40px; }
+.sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+.sh-left { display: flex; gap: 16px; align-items: flex-start; }
+.sh-no {
+  font-size: 52px; font-weight: 800; line-height: .82; letter-spacing: -3px;
+  color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.sh-titles h2 { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
+.sh-faction { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; color: var(--accent); }
+.sh-faction i { width: 9px; height: 9px; background: var(--accent); display: block; border-radius: 1px; }
+.sh-faction em { font-style: normal; color: var(--ink-30); letter-spacing: 1px; }
+.sh-desc { font-size: 12.5px; color: var(--ink-60); line-height: 1.75; max-width: 620px; margin-top: 9px; }
+.sh-desc b { color: var(--ink); font-weight: 700; }
+.sh-meta { text-align: right; font-size: 10px; color: var(--ink-30); line-height: 1.9; letter-spacing: .6px; flex: 0 0 auto; }
+.sh-meta b { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.sheet-grid { display: grid; grid-template-columns: 1.22fr 1fr; gap: 14px; }
+.panel {
+  background: var(--surface); border: 1px solid var(--line-hard); border-radius: 3px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px; border-bottom: 1px solid var(--line);
+  font-size: 10px; font-weight: 800; letter-spacing: 1.8px; color: var(--ink-60);
+  background: rgba(236, 234, 226, .55);
+}
+.panel-head em { font-style: normal; font-size: 9px; letter-spacing: 1px; color: var(--ink-30); }
+.panel-body { padding: 12px; flex: 1 1 auto; }
+canvas.plate { display: block; width: 100%; background: var(--paper); border: 1px solid var(--line); }
+.strip-wrap { margin-top: 14px; }
+.row3 { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 14px; margin-top: 14px; }
+
+.iconrow { display: flex; align-items: center; gap: 14px; }
+.iconbox {
+  width: 62px; height: 62px; border: 1px solid var(--line-mid); border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); background: var(--paper); flex: 0 0 auto;
+}
+.iconbox.sm { width: 30px; height: 30px; }
+.iconbox.sm2 { width: 20px; height: 20px; }
+.svgsrc {
+  font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  font-size: 9px; color: var(--ink-60); line-height: 1.55;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 2px;
+  padding: 8px 10px; word-break: break-all; flex: 1 1 auto; max-height: 84px; overflow: auto;
+}
+.copybtn {
+  cursor: pointer; border: 1px solid var(--line-hard); background: var(--ink); color: #fff;
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1px; padding: 5px 9px; border-radius: 2px;
+}
+.copybtn:hover { background: var(--accent); border-color: var(--accent); }
+
+.palette-strip { display: flex; gap: 0; border: 1px solid var(--line-mid); border-radius: 2px; overflow: hidden; }
+.pal { flex: 1 1 0; height: 42px; position: relative; }
+.pal span {
+  position: absolute; left: 0; right: 0; bottom: 3px; text-align: center;
+  font-size: 8.5px; font-weight: 800; letter-spacing: .4px; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4); font-variant-numeric: tabular-nums;
+}
+.pal.light span { color: var(--ink); text-shadow: none; }
+
+.copytab { width: 100%; border-collapse: collapse; font-size: 11px; }
+.copytab td { padding: 5px 0; border-bottom: 1px dashed var(--line); vertical-align: top; line-height: 1.6; }
+.copytab td:first-child { width: 74px; color: var(--ink-30); font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; padding-top: 7px; }
+.copytab td:last-child { color: var(--ink-60); }
+.copytab b { color: var(--ink); font-weight: 700; }
+
+.land { margin-top: 14px; background: var(--surface); border: 1px solid var(--line-hard); border-radius: 3px; overflow: hidden; }
+.land table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.land th {
+  text-align: left; padding: 8px 14px; font-size: 9.5px; font-weight: 800;
+  letter-spacing: 1.6px; color: var(--ink-60); border-bottom: 1px solid var(--line);
+  background: rgba(236,234,226,.55);
+}
+.land td { padding: 7px 14px; border-bottom: 1px solid var(--line); color: var(--ink-60); line-height: 1.55; }
+.land tr:last-child td { border-bottom: 0; }
+.land code { font-family: "SF Mono", "Cascadia Mono", Consolas, monospace; font-size: 10px; background: var(--paper); border: 1px solid var(--line); padding: 1px 5px; border-radius: 2px; color: var(--ink); }
+.land .tag { font-size: 9px; font-weight: 800; letter-spacing: .8px; padding: 2px 6px; border-radius: 2px; color: #fff; }
+.tag.now { background: var(--xian); }
+.tag.new { background: var(--arcane); }
+.tag.edit { background: var(--cobalt); }
+
+.footer {
+  flex: 0 0 auto; border-top: 1px solid var(--line-hard); background: var(--surface);
+  padding: 8px 18px; font-size: 10px; color: var(--ink-30); letter-spacing: .8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer b { color: var(--ink-60); }
+</style>
+</head>
+<body>
+
+<div class="control-bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+<div class="topbar">
+  <div class="tb-left">
+    <span class="swiss-tag">SWISS</span>
+    <div class="tb-title">
+      <h1>球球肉鸽 · 新武器设计图册</h1>
+      <p>WEAPON DESIGN ATLAS — MOTION STUDY EDITION</p>
+    </div>
+  </div>
+  <div class="tb-right">
+    <span class="phase">设计阶段 · 未接入游戏本体</span>
+    <div class="tb-meta">SHEET <b id="sheetNo">01 / 06</b></div>
+    <div class="tb-meta">规范 <b>v2.0</b></div>
+    <div class="tb-meta">2026-11-17</div>
+    <button class="btn-ctl on" id="btnGrid">制图网格</button>
+    <button class="btn-ctl on" id="btnAnim">动态播放</button>
+  </div>
+</div>
+
+<div class="main">
+  <aside class="side">
+    <div class="sec">
+      <div class="sec-head"><span>武器目录</span><em>INDEX</em></div>
+      <div class="sec-body"><div class="wlist" id="wlist"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span>印刷色卡</span><em>INK CHIPS</em></div>
+      <div class="sec-body"><div class="inkbars" id="inkbars"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span>线宽体系</span><em>STROKE</em></div>
+      <div class="sec-body">
+        <div class="lwrows" id="lwrows"></div>
+        <div style="margin-top:12px;font-size:10px;color:var(--ink-30);line-height:1.6">
+          动态一律<b style="color:var(--ink)">离散帧</b>，不使用缓动插值。<br>
+          帧长 <b style="color:var(--ink)">180ms</b>，每件武器 32 帧一循环。
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span>质感手法库</span><em>TEXTURE KIT</em></div>
+      <div class="sec-body">
+        <ul class="rules">
+          <li><b>纸纤维</b>：全幅叠加程序噪点，alpha 0.010–0.040</li>
+          <li><b>套印偏移</b>：主形体色版错位 1–1.5px，模拟印刷套不准</li>
+          <li><b>网点</b>：衰减区用点阵密度表达，替代 alpha 渐变</li>
+          <li><b>实色块</b>：瑞士版式的重量来源，线稿之外必须有实色</li>
+          <li><b>墨色四级</b>：100 / 60 / 30 / 12，用明度而非透明度分层</li>
+          <li><b>离散残影</b>：N 个独立几何副本递减透明，不做模糊拖尾</li>
+          <li><b>网格步进</b>：运动严格吸附网格，每帧跳整格</li>
+          <li><b>几何事件</b>：命中 = 一个可描述的图形规则演化，而非光晕</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span>几何母题库</span><em>MOTIFS</em></div>
+      <div class="sec-body"><div class="motifs" id="motifs"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span>禁用项</span><em>PROHIBITED</em></div>
+      <div class="sec-body">
+        <ul class="bans">
+          <li><b>霓虹光晕</b> — 任何形式的彩色 outerShadow 辉光</li>
+          <li><b>缓动插值</b> — 位置/缩放必须逐帧跳变</li>
+          <li><b>超过 3 色相</b> — 一件武器最多三色</li>
+          <li><b>圆角 &gt; 4px</b> — 面板与图形一律直切角</li>
+          <li><b>拟物纹理</b> — 金属拉丝、火焰噪点、粒子飞散</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <section class="sheet" id="sheet">
+    <div class="sheet-head">
+      <div class="sh-left">
+        <div class="sh-no" id="shNo">01</div>
+        <div class="sh-titles">
+          <h2 id="shName">—</h2>
+          <div class="sh-faction" id="shFaction"><i></i><span>—</span><em>—</em></div>
+          <p class="sh-desc" id="shDesc">—</p>
+        </div>
+      </div>
+      <div class="sh-meta" id="shMeta"></div>
+    </div>
+
+    <div class="sheet-grid">
+      <div class="panel">
+        <div class="panel-head"><span>A · 几何分解</span><em>EXPLODED CONSTRUCTION</em></div>
+        <div class="panel-body"><canvas class="plate" id="plateA"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span>B · 动态主画面</span><em>IN-SITU MOTION</em></div>
+        <div class="panel-body"><canvas class="plate" id="plateB"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel strip-wrap">
+      <div class="panel-head"><span>C · 运动研究带</span><em>8-FRAME SEQUENCE · DISCRETE</em></div>
+      <div class="panel-body"><canvas class="plate" id="plateC"></canvas></div>
+    </div>
+
+    <div class="row3">
+      <div class="panel">
+        <div class="panel-head"><span>D · 图标与色卡</span><em>ICON</em></div>
+        <div class="panel-body">
+          <div class="iconrow">
+            <div class="iconbox" id="iconBig"></div>
+            <div class="iconbox sm" id="iconMid"></div>
+            <div class="iconbox sm2" id="iconSml"></div>
+          </div>
+          <div class="svgsrc" id="svgSrc"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <button class="copybtn" id="btnCopy">复制 SVG 路径</button>
+            <span style="font-size:9.5px;color:var(--ink-30);letter-spacing:.5px">适配 <code style="font-size:9.5px">config.js → SKILL_SVGS</code></span>
+          </div>
+          <div class="palette-strip" id="palStrip" style="margin-top:10px"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span>E · 战场规则与文案</span><em>SPECIFICATION</em></div>
+        <div class="panel-body"><table class="copytab" id="specTable"></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span>F · 母题与构件</span><em>COMPONENTS</em></div>
+        <div class="panel-body"><table class="copytab" id="compTable"></table></div>
+      </div>
+    </div>
+
+    <div class="land">
+      <table>
+        <thead><tr><th style="width:190px">待接入位置</th><th style="width:110px">改动性质</th><th>说明</th></tr></thead>
+        <tbody id="landBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="footer">
+  <div><b>球球肉鸽</b> · 武器美术设计图册 · 纯 Canvas 2D 程序绘制，零贴图依赖 · <b>当前仅为设计稿，不写入游戏本体</b></div>
+  <div id="footNote">MODERN SWISS GEOMETRY · 24×24 SVG GRID · 2.1px STROKE · SQUARE CAP / MITER JOIN</div>
+</div>
+
+<script>
+'use strict';
+const TAU = Math.PI * 2;
+
+/* ══════════════ 色彩体系 ══════════════
+   纸：暖白为绝对底，纸白上的图形一律用「墨色四级 + 强调色」表达明度层级，
+   不用半透明叠色，避免发灰。强调色降饱和后彼此拉开明度距离。            */
+const PAL = {
+  paper:    '#F2EFE6',
+  paperAlt: '#E9E6DC',
+  ink:      '#111315',
+  ink60:    '#474C55',
+  ink30:    '#8C929B',
+  ink12:    '#C6C3B8',
+  blue:     '#0055FF',
+  xian:     '#0E8C63',
+  norse:    '#2E2A78',
+  xuan:     '#E63312',
+  arcane:   '#C2700A',
+  brass:    '#B37B00',
+  gold:     '#E0A100',
+  /* 纸白底上的专用深金：保证 ≥3:1 对比度 */
+  goldInk:  '#B37B00',
+  gray:     '#8C929B',
+};
+
+function rgba(hex, a) {
+  if (hex[0] !== '#') return hex;
+  const h = hex.slice(1);
+  const n = parseInt(h.length === 3 ? h[0]+h[0]+h[1]+h[1]+h[2]+h[2] : h, 16);
+  return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')';
+}
+function shadeUp(c) {
+  if (c[0] !== '#') return c;
+  const h = c.slice(1);
+  const n = parseInt(h.length === 3 ? h[0]+h[0]+h[1]+h[1]+h[2]+h[2] : h, 16);
+  const f = v => Math.min(255, Math.round(v + 255 * 0.16));
+  return 'rgb(' + f((n>>16)&255) + ',' + f((n>>8)&255) + ',' + f(n&255) + ')';
+}
+function shadeDown(c) {
+  if (c[0] !== '#') return c;
+  const h = c.slice(1);
+  const n = parseInt(h.length === 3 ? h[0]+h[0]+h[1]+h[1]+h[2]+h[2] : h, 16);
+  const f = v => Math.round(v * 0.90);
+  return 'rgb(' + f((n>>16)&255) + ',' + f((n>>8)&255) + ',' + f(n&255) + ')';
+}
+
+/* ══════════════ 质感系统 ══════════════ */
+
+/* 纸纤维：全幅叠加程序噪点 */
+let grainTile = null, grainPat = null;
+function getGrainTile() {
+  if (grainTile) return grainTile;
+  const c = document.createElement('canvas');
+  c.width = c.height = 140;
+  const g = c.getContext('2d');
+  for (let i = 0; i < 1200; i++) {
+    const a = 0.010 + Math.random() * 0.030;
+    g.fillStyle = 'rgba(17,19,21,' + a.toFixed(3) + ')';
+    g.fillRect(Math.random() * 140, Math.random() * 140, 1, 1);
+  }
+  grainTile = c;
+  return c;
+}
+function paperGrain(ctx, W, H) {
+  if (!grainPat) grainPat = ctx.createPattern(getGrainTile(), 'repeat');
+  ctx.save();
+  ctx.fillStyle = grainPat;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+/* 套印偏移：同一图形用两个色版错位绘制，模拟印刷套不准 */
+function misreg(ctx, drawFn, colorA, colorB, dx, dy) {
+  ctx.save();
+  ctx.globalAlpha = 0.42;
+  ctx.translate(dx, dy);
+  ctx.strokeStyle = colorB;
+  drawFn(ctx);
+  ctx.restore();
+  ctx.save();
+  ctx.translate(-dx * 0.45, -dy * 0.45);
+  ctx.strokeStyle = colorA;
+  drawFn(ctx);
+  ctx.restore();
+}
+
+/* 网点：衰减区用点阵密度表达 */
+function halftone(ctx, x, y, w, h, cell, color, maxR) {
+  ctx.save();
+  ctx.fillStyle = color;
+  const cols = Math.ceil(w / cell), rows = Math.ceil(h / cell);
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      const cx = x + i * cell + (j % 2 ? cell / 2 : 0);
+      const cy = y + j * cell;
+      const d = 1 - Math.abs((cx - (x + w / 2)) / (w / 2));
+      const r = Math.max(0, maxR * d);
+      if (r < 0.22) continue;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, TAU);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* 实色版块：瑞士版式的重量 */
+function solidBlock(ctx, x, y, w, h, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+}
+
+/* ══════════════ 通用绘图助手 ══════════════ */
+function matteBall(ctx, x, y, r, color, stroke) {
+  const sc = stroke || rgba(PAL.ink, 0.78);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y + Math.max(1.2, r * 0.09), r, 0, TAU);
+  ctx.fillStyle = 'rgba(17,19,21,0.10)';
+  ctx.fill();
+  ctx.restore();
+
+  const g = ctx.createRadialGradient(x - r*0.3, y - r*0.34, r*0.05, x, y, r*1.05);
+  g.addColorStop(0, shadeUp(color));
+  g.addColorStop(0.58, color);
+  g.addColorStop(1, shadeDown(color));
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.fillStyle = g;
+  ctx.fill();
+
+  const lw = Math.max(1, Math.min(2.2, r * 0.08));
+  ctx.lineWidth = lw;
+  ctx.strokeStyle = sc;
+  ctx.beginPath();
+  ctx.arc(x, y, r - lw * 0.5, 0, TAU);
+  ctx.stroke();
+
+  if (r >= 10) {
+    ctx.beginPath();
+    ctx.arc(x, y, r - lw * 1.6, -Math.PI * 0.82, -Math.PI * 0.38);
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = Math.max(1, r * 0.06);
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
+}
+
+function plateGrid(ctx, w, h, cell, alpha) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,' + (alpha || 0.05) + ')';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x <= w; x += cell) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+  for (let y = 0; y <= h; y += cell) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(17,19,21,' + (alpha || 0.05) * 2.4 + ')';
+  ctx.beginPath();
+  for (let x = 0; x <= w; x += cell * 5) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+  for (let y = 0; y <= h; y += cell * 5) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function crossTick(ctx, x, y, s, color, lw) {
+  ctx.save();
+  ctx.strokeStyle = color || 'rgba(17,19,21,0.30)';
+  ctx.lineWidth = lw || 1.25;
+  ctx.beginPath();
+  ctx.moveTo(x - s, y); ctx.lineTo(x + s, y);
+  ctx.moveTo(x, y - s); ctx.lineTo(x, y + s);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* 正八角路径（保持正八角，不做形变旋转） */
+function octaPath(ctx, x, y, r, rot) {
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * TAU - Math.PI / 8 + (rot || 0);
+    const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+}
+
+/* 六芒星路径 */
+function hexaPath(ctx, x, y, r, rot) {
+  ctx.beginPath();
+  for (let k = 0; k < 2; k++) {
+    for (let i = 0; i < 3; i++) {
+      const a = i / 3 * TAU - Math.PI / 2 + (rot || 0) + k * Math.PI;
+      const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+  }
+}
+
+/* 放射刻线 */
+function radialTicks(ctx, x, y, r0, r1, n, color, lw, phase) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw || 1.4;
+  ctx.lineCap = 'square';
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * TAU + (phase || 0);
+    ctx.beginPath();
+    ctx.moveTo(x + Math.cos(a) * r0, y + Math.sin(a) * r0);
+    ctx.lineTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* 离散弧段（每段之间留缝，用于余波/冲击） */
+function discreteArc(ctx, x, y, r, a0, a1, segs, color, lw) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw || 2;
+  ctx.lineCap = 'butt';
+  const step = (a1 - a0) / segs;
+  for (let i = 0; i < segs; i++) {
+    const s = a0 + step * i + step * 0.16;
+    const e = a0 + step * (i + 1) - step * 0.16;
+    ctx.beginPath();
+    ctx.arc(x, y, r, s, e);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* 卡尺（对位刻度线） */
+function caliper(ctx, x, y, half, color, lw) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw || 1.6;
+  ctx.lineCap = 'square';
+  ctx.beginPath();
+  ctx.moveTo(x - half, y); ctx.lineTo(x + half, y);
+  ctx.stroke();
+  ctx.lineWidth = (lw || 1.6) + 0.6;
+  [-half, half].forEach(function (dx) {
+    ctx.beginPath();
+    ctx.moveTo(x + dx, y - 6); ctx.lineTo(x + dx, y + 6);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* 12 刻度时停盘 */
+function clockDial(ctx, x, y, r, t, accent, label) {
+  const f = Math.floor(t / BEAT) % 12;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = rgba(PAL.ink, 0.30);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke();
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * TAU - Math.PI / 2;
+    const len = i % 3 === 0 ? 8 : 4.5;
+    const on = i === f;
+    ctx.strokeStyle = on ? accent : rgba(PAL.ink, 0.30);
+    ctx.lineWidth = on ? 2.4 : 1.2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    ctx.lineTo(Math.cos(a) * (r - len), Math.sin(a) * (r - len));
+    ctx.stroke();
+  }
+  const a = f / 12 * TAU - Math.PI / 2;
+  ctx.strokeStyle = rgba(PAL.ink, 0.68);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * (r - 11), Math.sin(a) * (r - 11));
+  ctx.stroke();
+  ctx.fillStyle = accent;
+  ctx.fillRect(-2.5, -2.5, 5, 5);
+  if (label) {
+    ctx.font = '800 8.5px "Inter",sans-serif';
+    ctx.fillStyle = rgba(PAL.ink, 0.48);
+    ctx.textAlign = 'center';
+    ctx.fillText(label, 0, r + 13);
+  }
+  ctx.restore();
+}
+
+/* 时间栅格（12 格，标记当前帧） */
+function frameGrid(ctx, x, y, w, h, cols, cur, accent) {
+  ctx.save();
+  const cw = w / cols;
+  for (let i = 0; i < cols; i++) {
+    const on = i === cur;
+    ctx.fillStyle = on ? rgba(accent, 0.16) : 'rgba(17,19,21,0.02)';
+    ctx.fillRect(x + i * cw, y, cw, h);
+    ctx.strokeStyle = on ? rgba(accent, 0.55) : 'rgba(17,19,21,0.10)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + i * cw + 0.5, y + 0.5, cw - 1, h - 1);
+  }
+  ctx.restore();
+}
+
+/* 标注牌 */
+function wrapText(ctx, text, maxW) {
+  const out = [];
+  let line = '';
+  for (let i = 0; i < text.length; i++) {
+    const t = line + text[i];
+    if (ctx.measureText(t).width > maxW && line) { out.push(line); line = text[i]; }
+    else line = t;
+  }
+  if (line) out.push(line);
+  return out;
+}
+function labelPlate(ctx, cx, y, idx, label, note, accent, maxW) {
+  const w = maxW || 220;
+  ctx.save();
+  ctx.font = '800 13px "Inter","PingFang SC","Microsoft YaHei",sans-serif';
+  const l1 = wrapText(ctx, label, w - 32);
+  ctx.font = '600 10.5px "Inter","PingFang SC","Microsoft YaHei",sans-serif';
+  const l2 = wrapText(ctx, note || '', w - 32);
+  const h = 22 + l1.length * 16 + l2.length * 14 + 12;
+  const x = cx - w / 2;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = 'rgba(17,19,21,0.42)';
+  ctx.lineWidth = 1;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  ctx.fillStyle = accent;
+  ctx.fillRect(x, y, w, 2.5);
+  ctx.fillStyle = accent;
+  ctx.fillRect(x + 10, y + 13, 17, 17);
+  ctx.font = '800 11px "Inter",sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(idx, x + 18.5, y + 22);
+  ctx.textAlign = 'left';
+  ctx.font = '800 13px "Inter","PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillStyle = '#111315';
+  l1.forEach((ln, i) => ctx.fillText(ln, x + 34, y + 22 + i * 16));
+  ctx.font = '600 10.5px "Inter","PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillStyle = 'rgba(17,19,21,0.58)';
+  l2.forEach((ln, i) => ctx.fillText(ln, x + 34, y + 22 + l1.length * 16 + i * 14 + 2));
+  ctx.restore();
+  return h;
+}
+
+/* 仪表读数框 */
+function gaugeBox(ctx, x, y, w, rows, accent) {
+  const h = 30 + rows.length * 23;
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.strokeStyle = 'rgba(17,19,21,0.34)';
+  ctx.lineWidth = 1;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  ctx.fillStyle = accent;
+  ctx.fillRect(x, y, 3.5, h);
+  rows.forEach((r, i) => {
+    const ry = y + 20 + i * 23;
+    ctx.font = '700 10.5px "Inter","PingFang SC",sans-serif';
+    ctx.fillStyle = 'rgba(17,19,21,0.55)';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(r[0], x + 14, ry);
+    ctx.font = '800 13.5px "Inter",sans-serif';
+    ctx.fillStyle = '#111315';
+    ctx.textAlign = 'right';
+    ctx.fillText(r[1], x + w - 14, ry);
+  });
+  ctx.restore();
+  return h;
+}
+
+function arrow(ctx, x, y, ang, len, color, lw, head) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(ang);
+  const hl = head || 7;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw || 1.6;
+  ctx.lineCap = 'square';
+  ctx.beginPath();
+  ctx.moveTo(0, 0); ctx.lineTo(len - hl, 0);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(len, 0); ctx.lineTo(len - hl, hl * 0.62);
+  ctx.lineTo(len - hl, -hl * 0.62);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ══════════════ 时基 ══════════════ */
+const BEAT = 0.18;
+const CYCLE = 32;
+function frameOf(t) { return Math.floor(t / BEAT) % CYCLE; }
+
+/* ══════════════ 武器数据 ══════════════ */
+const WEAPONS = [
+  {
+    id: 'heavy_cannon', no: '01', name: '盘古开天重锤', sub: '崩山一击',
+    faction: '东方玄幻', color: PAL.xuan, accent: PAL.gold, key: 'H',
+    svg: '<polygon points="9 6 15 6 18.5 10.5 18.5 15.5 15 20 9 20 5.5 15.5 5.5 10.5"/><line x1="12" y1="6" x2="12" y2="20"/><line x1="12" y1="2" x2="12" y2="6"/>',
+    tagline: '以攻速凝练极致崩山一击。重炮以绝对质量取代密度——命中不是爆炸，是<b>大地被劈开</b>。',
+    palette: [['主 · 玄铁', PAL.ink, false], ['辅 · 业火', PAL.xuan, false], ['强调 · 熔金', PAL.gold, true]],
+    spec: [
+      ['投射物', '大口径哑光玄铁球，外套<b>朱红正八角</b>框，八角在飞行中<b>保持自身几何</b>不做形变'],
+      ['残影', '<b>7 帧离散残影</b>，正八角逐帧收缩，透明度阶梯递减'],
+      ['命中', '<b>八角解构</b>：正八角分三层（玄铁→朱红→熔金）依次向外炸开'],
+      ['裂痕', '沿 45° 与 −45° 两道<b>刻度裂痕</b>，每段 12px 递进'],
+      ['节奏', '飞行 20 帧 → 命中 1 帧 → 解构 11 帧，32 帧循环'],
+    ],
+    comp: [
+      ['正八角', '主体轮廓，八边等分，呼应「八方开天」'],
+      ['中轴线', '贯穿线标记重心与弹道方向'],
+      ['平行尾迹', '三道等距直线，制图法表达重量'],
+      ['解构三层', '玄铁→朱红→熔金的色彩序列'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.heavy_cannon', 'edit', '替换为八角锤头 + 顶部发射轴 SVG'],
+      ['game.js → fireWeapon()', 'new', '生成 style:<code>"heavy"</code> 子弹，携带八角框字段'],
+      ['game.js → damageEnemy()', 'new', '命中时推入 <code>kind:"octa"</code> 解构特效'],
+    ],
+  },
+  {
+    id: 'glass_core', no: '02', name: '狂战士的血誓', sub: '裂心之血',
+    faction: '北欧神话', color: PAL.norse, accent: PAL.xuan, key: 'G',
+    svg: '<circle cx="12" cy="12" r="8"/><polyline points="8 7 11 11 9.5 14.5"/><polyline points="15.5 8 13 11.5 15 15"/><line x1="11" y1="11" x2="13" y2="11.5"/>',
+    tagline: '献祭凡人躯壳，换取奥丁狂怒。玻璃罩上的裂纹，是每一次受击的<b>离散记账</b>。',
+    palette: [['主 · 裂晶', PAL.norse, false], ['辅 · 狂血', PAL.xuan, false], ['强调 · 霜白', '#FFFFFF', true]],
+    spec: [
+      ['常驻', '玩家球外浮现紫色玻璃裂纹环，<b>每条裂纹分三节</b>'],
+      ['生长', '裂纹<b>逐节点亮</b>，第 n 节在第 n 个节拍亮起，阶梯式而非连续'],
+      ['受击', '第 20 帧裂纹整体白闪一帧，随后转紫'],
+      ['断裂弧', '两段外弧按<b>心跳式离散跳动</b>，每 4 帧换一次角度'],
+      ['上限', '裂纹至多 6 条 × 3 节 = 18 节，超出后最旧一节熄灭'],
+    ],
+    comp: [
+      ['圆', '玻璃罩外轮廓，始终完整'],
+      ['裂纹', '互不自交的折线，三节递进'],
+      ['断裂弧', '外侧两段短弧，心跳式跳动'],
+      ['霜白', '仅用于受击那一帧的高光'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.glass_core', 'edit', '替换为「破裂的圆」SVG'],
+      ['game.js → drawPlayer()', 'new', '绘制裂纹环，读取 <code>p.crackHits</code>'],
+      ['game.js → hurtPlayer()', 'new', '受击时 <code>p.crackHits++</code> 并触发白闪'],
+    ],
+  },
+  {
+    id: 'refract', no: '03', name: '霍格沃茨回旋咒', sub: '星轨折返',
+    faction: '英式奥术', color: PAL.arcane, accent: PAL.gold, key: 'R',
+    svg: '<polygon points="12 3 20 15 4 15"/><polygon points="12 21 4 9 20 9"/><polyline points="7 19 12 19 12 15"/>',
+    tagline: '任何飞出边界的魔咒，终将循着星轨折返。镜面处折射出<b>双色色散</b>，像真实的棱镜。',
+    palette: [['主 · 秘金', PAL.arcane, false], ['强调 · 折光白', PAL.gold, true], ['辅 · 钴蓝', PAL.blue, false]],
+    spec: [
+      ['折返', '子弹飞出视野边界后<b>反向</b>飞回，保留 <b>70%</b> 伤害'],
+      ['镜印', '折返点生成<b>六芒星</b>，按 <b>12 帧离散旋转</b>（每帧 +30°）'],
+      ['色散', '光路画成<b>琥珀 + 钴蓝两条错位 4px</b> 的线，表达光学色散'],
+      ['折射角', '镜印处标注 45° 折射角与虚线法线'],
+      ['节拍', '飞出 14 帧 → 折返 6 帧 → 返程 12 帧'],
+    ],
+    comp: [
+      ['六芒星', '双等边三角叠加，外径 = 弹径 × 3.4'],
+      ['Z 折线', '光路折返的直角抽象'],
+      ['双色错位', '色散的最小表达：两条平行偏移线'],
+      ['法线虚线', '90° 垂直虚线，标注折射基准'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.refract', 'edit', '替换为六芒星 + Z 折线 SVG'],
+      ['game.js → updateBullets()', 'new', '出界检测 → 反转速度、伤害 ×0.7、标记 <code>b.refracted</code>'],
+      ['game.js → drawFx()', 'new', '新增 <code>kind:"mirror"</code> 六芒星 + 色散光路'],
+    ],
+  },
+  {
+    id: 'momentum', no: '04', name: '凌波微步 · 化劲', sub: '身法即剑法',
+    faction: '国风仙侠', color: PAL.xian, accent: PAL.ink, key: 'M',
+    svg: '<polyline points="5 6 12 10 19 6"/><polyline points="5 11 12 15 19 11"/><polyline points="5 16 12 20 19 16"/><line x1="12" y1="2.5" x2="12" y2="7"/>',
+    tagline: '遁速越快，剑意越盛。玩家<b>不做插值</b>——每一帧跳一整格，身法是离散步进。',
+    palette: [['主 · 青碧', PAL.xian, false], ['辅 · 墨', PAL.ink, false], ['强调 · 霜白', '#FFFFFF', true]],
+    spec: [
+      ['步进', '玩家球<b>每 4 帧跳一整格</b>，8 格循环，绝不插值'],
+      ['残影', '6 枚卦爻刻度盘吸附在<b>经过的格位</b>上，透明度阶梯递减'],
+      ['刻度', '每枚卦爻盘的 8 向刻度按帧<b>离散旋转 15°</b>'],
+      ['转化', '高于基础移速的每 10%，提供 +12% 全局伤害'],
+      ['网格', '画面显式绘制 64px 网格，强调「格」的概念'],
+    ],
+    comp: [
+      ['卦爻', '三爻连续折线，八卦卦象母题'],
+      ['刻度盘', '8 向径向短线，对应八卦方位'],
+      ['箭羽', '中轴箭形，指示前进方向'],
+      ['同心组', '环组数量 = 移速加成档位'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.momentum', 'edit', '替换为卦爻三线 + 中轴 SVG'],
+      ['game.js → updatePlayer()', 'new', '按移速生成 <code>Game.fx kind:"trigram"</code> 残影'],
+      ['game.js → effectiveDmg()', 'new', '接入 <code>stats.momentum</code> 的移速→伤害换算'],
+    ],
+  },
+  {
+    id: 'pinball_master', no: '05', name: '巨灵神之掌 · 崩撞', sub: '借力打力',
+    faction: '东方玄幻', color: PAL.ink, accent: PAL.xuan, key: 'P',
+    svg: '<circle cx="5.5" cy="12" r="3.6"/><circle cx="18.5" cy="12" r="3.6"/><polyline points="9 10 14.5 10"/><polyline points="12.5 8 14.5 10 12.5 12"/><polyline points="15 14 9.5 14"/><polyline points="11.5 12 9.5 14 11.5 16"/>',
+    tagline: '令万千妖球自相残杀。冲量在<b>掌印</b>之间传递，撞碎沿途一切。',
+    palette: [['主 · 玄墨', PAL.ink, false], ['辅 · 业火', PAL.xuan, false], ['强调 · 砂白', '#FFFFFF', true]],
+    spec: [
+      ['接近', '两球<b>离散步进</b>相向运动，每帧跳 12px'],
+      ['形变', '接触帧两球<b>严格比例压扁</b>（X 0.72 / Y 1.28），下一帧弹回'],
+      ['掌印', '撞击点<b>盖印</b>方形朱红掌印，4 帧内每帧旋转 +15°、放大 1.25×'],
+      ['冲量线', '8 条放射刻线，长度按帧递增'],
+      ['余波', '墨黑弧<b>分 4 段离散扩张</b>，每帧半径 +14px'],
+    ],
+    comp: [
+      ['双球', '两球相切的运动画面'],
+      ['双向箭头', '等量反向，表达动量守恒'],
+      ['方印', '带切角的方形压痕'],
+      ['冲量刻线', '8 向放射，等距递进'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.pinball_master', 'edit', '替换为双球 + 双向箭头 SVG'],
+      ['game.js → separateEnemies()', 'edit', '对撞触发时推入 <code>kind:"palm"</code> 掌印特效'],
+      ['game.js → killEnemy()', 'edit', '对撞击杀走双倍经验分支'],
+    ],
+  },
+  {
+    id: 'exact_hunter', no: '06', name: '天机算尽 · 归零劫', sub: '算尽命数',
+    faction: '国风仙侠', color: PAL.xian, accent: PAL.gold, key: 'E',
+    svg: '<circle cx="12" cy="9" r="6"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="7" y1="21" x2="17" y2="21"/><line x1="12" y1="3" x2="12" y2="6"/>',
+    tagline: '洞察万物命数，强行抹平残存气数。血量被<b>卡尺式夹紧</b>，数字逐位归零。',
+    palette: [['主 · 青碧', PAL.xian, false], ['强调 · 归零金', PAL.gold, true], ['辅 · 墨', PAL.ink, false]],
+    spec: [
+      ['锁定', '血量 ≤ 单发伤害 1.25× 的敌球被上下两道<b>卡尺</b>夹住'],
+      ['收拢', '卡尺<b>每帧跳 4px</b> 向内收拢，像卡尺一格格夹紧，最小间距 12px'],
+      ['递减', '敌球血量数字<b>逐位递减</b>（离散），最后 1 帧归零'],
+      ['归零', '三层金色同心环<b>按帧序收缩</b> + 十字解构线四向射出'],
+      ['克制', '仅对非 Boss 敌球生效'],
+    ],
+    comp: [
+      ['圆规', '圆规头 + 立柱 + 底座'],
+      ['卡尺', '带端齿的平行夹持线'],
+      ['端齿', '短线标记测量端点'],
+      ['三层金环', '由外向内的帧序收缩'],
+    ],
+    land: [
+      ['config.js → SKILL_SVGS.exact_hunter', 'edit', '替换为圆规 + 底座 SVG'],
+      ['game.js → damageEnemy()', 'edit', '接入 <code>stats.exactHunter</code>，补足伤害并强制归零'],
+      ['game.js → drawEnemies()', 'new', '绘制锁定卡尺，随 hp 收拢'],
+    ],
+  },
+];
+
+/* ══════════════ 零件说明与配重 ══════════════ */
+const PART_NOTES = {
+  heavy_cannon: [
+    '八边等分，呼应「八方开天」；实心玄铁代表绝对质量',
+    '2.2px 朱红贯穿线，标记重心与弹道方向',
+    '3 道等距直线，制图法表达重量与惯性',
+    '玄铁→朱红→熔金的三层色彩序列',
+  ],
+  glass_core: [
+    '始终完整的圆，代表尚未破碎的躯壳',
+    '折线互不自交，分三节递进点亮',
+    '外侧两段短弧，按心跳式离散跳动',
+    '极小面积的纯白，仅用于受击那一帧',
+  ],
+  refract: [
+    '两组等边三角叠加，外径 = 弹径 × 3.4',
+    '直角折返，制图法的光路抽象',
+    '1.2px 虚线，标示一次完整的折返光路',
+    '折返瞬间生成并按 12 帧旋转的镜印',
+  ],
+  momentum: [
+    '三爻连续折线，取自八卦卦象母题',
+    '8 向径向短线，对应八卦方位',
+    '中轴箭形，指示身法的前进方向',
+    '同心环组数量 = 当前移速加成档位',
+  ],
+  pinball_master: [
+    '两球相切，是整套机制的运动画面',
+    '等量反向箭头，表达动量守恒',
+    '方形带切角的压痕，即几何掌印',
+    '墨黑弧分 4 段离散扩张',
+  ],
+  exact_hunter: [
+    '圆规 + 立柱 + 底座，测量的原型结构',
+    '两道卡尺夹住目标，每帧跳 4px',
+    '短线标记精确端点，形成测量语义',
+    '金色三层环由外向内帧序收缩',
+  ],
+};
+const PART_SCALE = {
+  heavy_cannon:   [1.00, 1.05, 1.20, 1.15],
+  glass_core:     [1.00, 1.10, 1.20, 1.25],
+  refract:        [1.00, 1.25, 1.20, 1.10],
+  momentum:       [1.00, 1.20, 1.30, 1.35],
+  pinball_master: [1.00, 1.25, 1.05, 1.30],
+  exact_hunter:   [1.00, 1.35, 1.55, 1.10],
+};
+
+/* ══════════════ 动态主体（focus = 干净主体 / scene = 含环境） ══════════════ */
+const BUILD = {
+  /* ── W-01 盘古开天重锤 ── */
+  heavy_cannon: {
+    strip: [12, 16, 19, 20, 21, 23, 26, 30], key: 23,
+    decompose: [
+      { label: '正八角 · 锤体主轮廓', draw: function (c) {
+        octaPath(c, 0, 0, 42); c.fillStyle = PAL.ink; c.fill();
+        c.lineWidth = 2.2; c.strokeStyle = PAL.ink; c.stroke();
+      } },
+      { label: '中轴线 · 重心与发射轴', draw: function (c) {
+        c.strokeStyle = PAL.xuan; c.lineWidth = 1.6;
+        c.beginPath(); c.moveTo(0, -56); c.lineTo(0, 46); c.stroke();
+        c.fillStyle = PAL.xuan; c.beginPath(); c.arc(0, 0, 3.2, 0, TAU); c.fill();
+      } },
+      { label: '平行尾迹 ×3 · 速度感', draw: function (c) {
+        c.strokeStyle = rgba(PAL.goldInk, 0.9); c.lineWidth = 1.4; c.lineCap = 'square';
+        for (let i = -1; i <= 1; i++) { c.beginPath(); c.moveTo(i * 14, -32); c.lineTo(i * 14, 32); c.stroke(); }
+      } },
+      { label: '八角解构 · 三层色彩', draw: function (c) {
+        const cols = [PAL.ink, PAL.xuan, PAL.goldInk];
+        for (let i = 0; i < 3; i++) {
+          octaPath(c, 0, 0, 40 - i * 9, i * 0.28);
+          c.strokeStyle = cols[i]; c.lineWidth = 3.2 - i * 0.6; c.stroke();
+        }
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const px = W * 0.20, py = H * 0.70;
+      const startX = px + 46, startY = py - 18;
+      const endX = W * 0.74, endY = H * 0.24;
+
+      // 5 帧离散残影：正八角逐帧收缩（每隔 2 帧取样，间距更清晰）
+      for (let i = 4; i >= 0; i--) {
+        const fr = f - i * 2;
+        if (fr < 0) continue;
+        const k = Math.min(1, fr / 20);
+        const gx = startX + (endX - startX) * k;
+        const gy = startY + (endY - startY) * k;
+        ctx.save();
+        ctx.globalAlpha = (1 - i / 5) * 0.42;
+        octaPath(ctx, gx, gy, 25 * (1 - i * 0.12));
+        ctx.strokeStyle = PAL.xuan; ctx.lineWidth = 2; ctx.stroke();
+        ctx.restore();
+      }
+
+      const k = Math.min(1, f / 20);
+      const bx = startX + (endX - startX) * k;
+      const by = startY + (endY - startY) * k;
+
+      // 命中后的八角解构
+      if (f >= 20) {
+        const kk = (f - 20) / 11;
+        const cols = [PAL.ink, PAL.xuan, PAL.goldInk];
+        for (let i = 0; i < 3; i++) {
+          const kk2 = kk * 3 - i;
+          if (kk2 <= 0) continue;
+          const kk3 = Math.min(1, kk2);
+          ctx.save();
+          ctx.globalAlpha = 1 - kk3;
+          octaPath(ctx, endX, endY, 26 - i * 8 + kk3 * 30, i * 0.3 + kk * 0.4);
+          ctx.strokeStyle = cols[i];
+          ctx.lineWidth = 3.6 - i * 0.7;
+          ctx.stroke();
+          ctx.restore();
+        }
+        // 网点衰减区：替代 alpha 渐变
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - kk) * 0.45;
+        halftone(ctx, endX - 82, endY - 8, 164, 78, 7, PAL.xuan, 2.1);
+        ctx.restore();
+        // 刻度裂痕
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - kk);
+        ctx.strokeStyle = PAL.xuan; ctx.lineWidth = 2.2; ctx.lineCap = 'square';
+        ctx.beginPath();
+        ctx.moveTo(endX - 60, endY + 58); ctx.lineTo(endX - 24, endY + 30);
+        ctx.lineTo(endX - 6, endY + 44); ctx.lineTo(endX + 40, endY + 8);
+        ctx.stroke();
+        ctx.strokeStyle = rgba(PAL.goldInk, 0.9); ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(endX - 44, endY + 74); ctx.lineTo(endX - 12, endY + 56); ctx.lineTo(endX + 26, endY + 32);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // 弹体：八角框保持正八角，套印偏移出印刷感
+        misreg(ctx, function (c) {
+          octaPath(c, bx, by, 26, -f * 0.1);
+          c.lineWidth = 2.6;
+          c.stroke();
+        }, PAL.xuan, PAL.ink, 1.5, -1.0);
+        matteBall(ctx, bx, by, 14, PAL.ink, PAL.xuan);
+        ctx.save();
+        ctx.font = '800 13px "Inter",sans-serif'; ctx.fillStyle = '#FBFAF6';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('440', bx, by);
+        ctx.restore();
+      }
+
+      // 玩家球与三道平行尾迹
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.xuan, 0.5); ctx.lineWidth = 1.4; ctx.lineCap = 'square';
+      for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(px - 28, py + i * 8); ctx.lineTo(px - 9, py + i * 8); ctx.stroke(); }
+      ctx.restore();
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+    },
+    scene: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      battleEnv(ctx, W, H, PAL.xuan, [
+        [W * 0.58, H * 0.14, 12, PAL.xuan, '260'],
+        [W * 0.90, H * 0.80, 15, PAL.xuan, '1840'],
+      ], [['弹丸伤害', '440'], ['射速', '0.68 /s'], ['击退', '220'], ['穿透', '3']]);
+      // 目标敌球
+      matteBall(ctx, W * 0.80, H * 0.19, 21, PAL.xuan, PAL.ink);
+      ctx.save();
+      ctx.font = '800 14px "Inter",sans-serif'; ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('3100', W * 0.80, H * 0.19);
+      ctx.restore();
+      BUILD.heavy_cannon.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.xuan, 'BEAT');
+    },
+  },
+
+  /* ── W-02 狂战士的血誓 ── */
+  glass_core: {
+    strip: [0, 2, 4, 6, 9, 14, 20, 27], key: 20,
+    decompose: [
+      { label: '圆 · 玻璃罩外轮廓', draw: function (c) {
+        c.beginPath(); c.arc(0, 0, 40, 0, TAU);
+        c.lineWidth = 2.2; c.strokeStyle = PAL.norse; c.stroke();
+        c.fillStyle = rgba(PAL.norse, 0.07); c.fill();
+      } },
+      { label: '裂纹 ×3 节 · 阶梯点亮', draw: function (c) {
+        c.strokeStyle = PAL.norse; c.lineWidth = 1.8; c.lineJoin = 'miter';
+        c.beginPath();
+        c.moveTo(-26, -14); c.lineTo(-12, -2); c.lineTo(-18, 10);
+        c.moveTo(14, -24); c.lineTo(6, -10); c.lineTo(16, 4);
+        c.stroke();
+        c.strokeStyle = rgba(PAL.norse, 0.4); c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(-12, -2); c.lineTo(4, -4); c.lineTo(16, 4);
+        c.stroke();
+      } },
+      { label: '断裂弧 ×2 · 心跳跳动', draw: function (c) {
+        c.strokeStyle = rgba(PAL.norse, 0.8); c.lineWidth = 2.6; c.lineCap = 'butt';
+        c.beginPath(); c.arc(0, 0, 50, -0.55, 0.6); c.stroke();
+        c.beginPath(); c.arc(0, 0, 50, Math.PI - 0.45, Math.PI + 0.75); c.stroke();
+      } },
+      { label: '霜白 · 受击帧高光', draw: function (c) {
+        c.beginPath(); c.arc(0, 0, 26, 0, TAU);
+        c.fillStyle = PAL.ink; c.fill();
+        c.strokeStyle = rgba(PAL.norse, 0.9); c.lineWidth = 1.6; c.stroke();
+        c.strokeStyle = '#FFFFFF'; c.lineWidth = 2.2; c.lineCap = 'round';
+        c.beginPath();
+        c.moveTo(-13, -4); c.lineTo(-2, -9); c.lineTo(4, 2); c.lineTo(13, -3);
+        c.stroke();
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const px = W * 0.38, py = H * 0.50;
+      const hitFrame = 20;
+      const hitFlash = f === hitFrame;
+
+      // 6 条裂纹 × 3 节，逐节点亮（纸白底上以朱红→深紫表达层级，禁用白色）
+      ctx.save();
+      ctx.translate(px, py);
+      for (let i = 0; i < 6; i++) {
+        const a = i / 6 * TAU + 0.26;
+        for (let j = 0; j < 3; j++) {
+          const birth = i * 2 + j;
+          if (f < birth) continue;
+          const age = f - birth;
+          const fresh = age < 3;
+          const mature = Math.min(1, age / 6);
+          ctx.save();
+          ctx.rotate(a);
+          ctx.strokeStyle = hitFlash ? PAL.xuan : (fresh ? PAL.xuan : rgba(PAL.norse, 0.34 + 0.56 * mature));
+          ctx.lineWidth = hitFlash ? 3 : (fresh ? 2.6 : 1.8);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'miter';
+          const segs = [[-6, -14], [-6, -23], [-6, -32]];
+          const s = segs[j];
+          ctx.beginPath();
+          ctx.moveTo(s[0], s[1]);
+          ctx.lineTo(s[0] + (j === 1 ? 5 : -3), s[1] - (j === 1 ? 4 : 5));
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      ctx.restore();
+
+      // 外圈断裂弧：每 4 帧换一次角度（心跳）
+      const beat = Math.floor(f / 4) % 4;
+      const arcA = [-0.55, -0.35, -0.15, -0.42][beat];
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.norse, 0.7); ctx.lineWidth = 2.4; ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.arc(px, py, 30, arcA, arcA + 1.15); ctx.stroke();
+      ctx.beginPath(); ctx.arc(px, py, 30, Math.PI - arcA, Math.PI - arcA + 1.0); ctx.stroke();
+      ctx.restore();
+
+      // 血量环（瑞士仪表）
+      ctx.save();
+      ctx.strokeStyle = 'rgba(17,19,21,0.12)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(px, py, 38, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = PAL.norse; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(px, py, 38, -Math.PI / 2, -Math.PI / 2 + TAU * 0.58); ctx.stroke();
+      ctx.restore();
+
+      // 玩家球
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+      if (hitFlash) {
+        // 受击帧：外圈朱红冲击环 + 裂纹全部转为朱红并加粗
+        ctx.save();
+        ctx.strokeStyle = PAL.xuan; ctx.lineWidth = 2.2; ctx.lineCap = 'square';
+        ctx.beginPath(); ctx.arc(px, py, 41, 0, TAU); ctx.stroke();
+        ctx.restore();
+      }
+    },
+    scene: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      battleEnv(ctx, W, H, PAL.norse, [
+        [W * 0.76, H * 0.16, 12, PAL.xuan, '340'],
+        [W * 0.91, H * 0.66, 16, PAL.xuan, '990'],
+      ], [['全局伤害', '×1.55'], ['暴击率', '+20%'], ['生命上限', '-35%'], ['裂纹上限', '18 节']]);
+      BUILD.glass_core.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.norse, 'BEAT');
+    },
+  },
+
+  /* ── W-03 霍格沃茨回旋咒 ── */
+  refract: {
+    strip: [8, 12, 14, 15, 17, 21, 26, 31], key: 15,
+    decompose: [
+      { label: '双三角 · 所罗门六芒星', draw: function (c) {
+        c.strokeStyle = PAL.arcane; c.lineWidth = 2.2; c.lineJoin = 'miter';
+        hexaPath(c, 0, 0, 40); c.stroke();
+      } },
+      { label: 'Z 折线 · 光路折返', draw: function (c) {
+        c.strokeStyle = PAL.ink; c.lineWidth = 2.2; c.lineJoin = 'miter'; c.lineCap = 'square';
+        c.beginPath();
+        c.moveTo(-34, -12); c.lineTo(14, -12); c.lineTo(-30, 10); c.lineTo(18, 10);
+        c.stroke();
+      } },
+      { label: '色散 · 双色错位 4px', draw: function (c) {
+        c.strokeStyle = PAL.arcane; c.lineWidth = 1.8;
+        c.beginPath(); c.moveTo(-40, -8); c.lineTo(34, -16); c.stroke();
+        c.strokeStyle = PAL.blue; c.lineWidth = 1.8;
+        c.beginPath(); c.moveTo(-40, -2); c.lineTo(34, -10); c.stroke();
+      } },
+      { label: '镜印 · 12 帧离散旋转', draw: function (c) {
+        c.strokeStyle = PAL.arcane; c.lineWidth = 2.2;
+        c.beginPath(); c.arc(0, 0, 22, 0, TAU); c.stroke();
+        c.strokeStyle = rgba(PAL.goldInk, 0.9); c.lineWidth = 1.4;
+        c.beginPath(); c.moveTo(0, -22); c.lineTo(0, -32); c.stroke();
+        c.beginPath(); c.moveTo(0, 22); c.lineTo(0, 32); c.stroke();
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const px = W * 0.16, py = H * 0.56;
+      const mirrorX = W - 46, mirrorY = H * 0.30;
+      const OUT = 14;    // 飞出帧数
+      const BACK = 12;   // 返程帧数
+
+      let bx, by, dir, showMirror = false;
+      if (f < OUT) {
+        const k = f / OUT;
+        bx = px + 40 + k * (mirrorX - px - 40);
+        by = py + (mirrorY - py) * k * 0.9;
+        dir = 1;
+      } else {
+        const k = (f - OUT) / BACK;
+        bx = mirrorX - k * (mirrorX - px - 40);
+        by = mirrorY - (mirrorY - py) * k * 0.9;
+        dir = -1;
+        showMirror = f < OUT + 8;
+      }
+
+      // 8 帧离散残影：只描边不填充，保持制图轨迹感
+      for (let i = 7; i >= 0; i--) {
+        const fr = f - i;
+        if (fr < 0) continue;
+        const kk = fr < OUT ? fr / OUT : 1 - (fr - OUT) / BACK;
+        const gx = fr < OUT ? px + 40 + kk * (mirrorX - px - 40) : mirrorX - kk * (mirrorX - px - 40);
+        const gy = fr < OUT ? py + (mirrorY - py) * kk * 0.9 : mirrorY - (mirrorY - py) * kk * 0.9;
+        ctx.save();
+        ctx.globalAlpha = (1 - i / 8) * 0.42;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 10 - i * 0.42, 0, TAU);
+        ctx.strokeStyle = PAL.arcane; ctx.lineWidth = 1.9;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 镜印：六芒星按 12 帧离散旋转
+      if (showMirror) {
+        const rot = Math.floor(f / 12) * (Math.PI / 6);
+        ctx.save();
+        hexaPath(ctx, mirrorX, mirrorY, 26, rot);
+        ctx.strokeStyle = PAL.arcane; ctx.lineWidth = 2.2; ctx.lineJoin = 'miter'; ctx.stroke();
+        ctx.restore();
+        // 法线虚线
+        ctx.save();
+        ctx.strokeStyle = rgba(PAL.ink, 0.32); ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(mirrorX, mirrorY - 44); ctx.lineTo(mirrorX, mirrorY + 44); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '800 10px "Inter",sans-serif'; ctx.fillStyle = rgba(PAL.ink, 0.55);
+        ctx.textAlign = 'left';
+        ctx.fillText('45°', mirrorX + 8, mirrorY - 30);
+        ctx.restore();
+      }
+
+      // 色散光路：琥珀 + 钴蓝两条错位 4px
+      ctx.save();
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([7, 5]);
+      ctx.strokeStyle = rgba(PAL.arcane, 0.85);
+      ctx.beginPath(); ctx.moveTo(mirrorX - 4, mirrorY - 2); ctx.lineTo(bx, by - 2); ctx.stroke();
+      ctx.strokeStyle = rgba(PAL.blue, 0.75);
+      ctx.beginPath(); ctx.moveTo(mirrorX - 4, mirrorY + 2); ctx.lineTo(bx, by + 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // 弹体
+      matteBall(ctx, bx, by, 10, PAL.arcane, PAL.ink);
+      ctx.save();
+      ctx.font = '800 11px "Inter",sans-serif'; ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('190', bx, by);
+      ctx.restore();
+
+      // 玩家球
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+    },
+    scene: function (ctx, W, H, t) {
+      battleEnv(ctx, W, H, PAL.arcane, [
+        [W * 0.52, H * 0.14, 12, PAL.xuan, '610'],
+        [W * 0.88, H * 0.82, 17, PAL.xuan, '2260'],
+      ], [['折返伤害', '70%'], ['折返次数', '1'], ['镜印', '12 帧/圈'], ['光路', '双色散']]);
+      BUILD.refract.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.arcane, 'BEAT');
+    },
+  },
+
+  /* ── W-04 凌波微步 · 化劲 ── */
+  momentum: {
+    strip: [0, 4, 8, 12, 16, 20, 24, 28], key: 12,
+    decompose: [
+      { label: '卦爻 ×3 · 锯齿母题', draw: function (c) {
+        c.strokeStyle = PAL.xian; c.lineWidth = 2.2; c.lineJoin = 'miter'; c.lineCap = 'square';
+        for (let i = 0; i < 3; i++) {
+          const y = -22 + i * 22;
+          c.beginPath(); c.moveTo(-38, y); c.lineTo(0, y + 11); c.lineTo(38, y); c.stroke();
+        }
+      } },
+      { label: '刻度盘 · 八卦方位', draw: function (c) {
+        c.strokeStyle = rgba(PAL.xian, 0.9); c.lineWidth = 1.4; c.lineCap = 'square';
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * TAU;
+          c.beginPath();
+          c.moveTo(Math.cos(a) * 26, Math.sin(a) * 26);
+          c.lineTo(Math.cos(a) * 34, Math.sin(a) * 34);
+          c.stroke();
+        }
+        c.beginPath(); c.arc(0, 0, 36, 0, TAU);
+        c.strokeStyle = rgba(PAL.xian, 0.55); c.lineWidth = 1.2; c.stroke();
+      } },
+      { label: '箭羽 · 前进轴', draw: function (c) {
+        c.strokeStyle = PAL.ink; c.lineWidth = 2; c.lineCap = 'square';
+        c.beginPath(); c.moveTo(0, 14); c.lineTo(0, -14); c.stroke();
+        c.beginPath();
+        c.moveTo(0, -22); c.lineTo(-7, -10); c.lineTo(7, -10); c.closePath();
+        c.fillStyle = PAL.ink; c.fill();
+      } },
+      { label: '残影同心组 · 密度映射', draw: function (c) {
+        c.strokeStyle = rgba(PAL.xian, 0.30); c.lineWidth = 1.2;
+        for (let i = 0; i < 4; i++) { c.beginPath(); c.arc(0, 0, 10 + i * 8, 0, TAU); c.stroke(); }
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const cols = 6, rows = 3;
+      const gx = W / cols, gy = H / rows;
+
+      // 显式网格：强调「格」
+      ctx.save();
+      ctx.strokeStyle = 'rgba(17,19,21,0.16)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 1; i < cols; i++) { ctx.moveTo(i * gx, 0); ctx.lineTo(i * gx, H); }
+      for (let j = 1; j < rows; j++) { ctx.moveTo(0, j * gy); ctx.lineTo(W, j * gy); }
+      ctx.stroke();
+      ctx.restore();
+
+      // 玩家所在格位：每 4 帧跳一整格
+      const step = Math.floor(f / 4) % 8;
+      const path = [[0,2],[1,2],[2,2],[2,1],[3,1],[3,0],[2,0],[1,1]];
+      const cell = path[step];
+      const px = cell[0] * gx + gx / 2;
+      const py = cell[1] * gy + gy / 2;
+
+      // 4 枚残影盘吸附在经过的格位上
+      for (let i = 3; i >= 0; i--) {
+        const sp = (step - i + 8) % 8;
+        const c = path[sp];
+        const rx = c[0] * gx + gx / 2, ry = c[1] * gy + gy / 2;
+        ctx.save();
+        ctx.globalAlpha = (1 - i / 4) * 0.42;
+        ctx.translate(rx, ry);
+        ctx.rotate(Math.floor(f / 2) * 0.13);
+        ctx.strokeStyle = PAL.xian; ctx.lineWidth = 1.4; ctx.lineCap = 'square';
+        for (let j = 0; j < 8; j++) {
+          const a = j / 8 * TAU;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * 20, Math.sin(a) * 20);
+          ctx.lineTo(Math.cos(a) * 27, Math.sin(a) * 27);
+          ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(0, 0, 29, 0, TAU);
+        ctx.strokeStyle = rgba(PAL.xian, 0.5); ctx.lineWidth = 1.1; ctx.stroke();
+        ctx.restore();
+      }
+
+      // 玩家球 + 三道平行速度线
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.ink, 0.45); ctx.lineWidth = 1.4; ctx.lineCap = 'square';
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(px - 40, py - 8 + i * 8); ctx.lineTo(px - 22, py - 8 + i * 8);
+        ctx.stroke();
+      }
+      ctx.restore();
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+
+      // 当前格位标记
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.xian, 0.5); ctx.lineWidth = 1.4;
+      ctx.strokeRect(cell[0] * gx + 4, cell[1] * gy + 4, gx - 8, gy - 8);
+      ctx.restore();
+
+      // 伤害增益读数
+      ctx.save();
+      ctx.font = '800 ' + (W < 240 ? 11 : 13) + 'px "Inter",sans-serif';
+      ctx.fillStyle = PAL.xian;
+      ctx.textAlign = 'center';
+      ctx.fillText(W < 240 ? '+36%' : '+36% DMG', px, py - 26);
+      ctx.restore();
+    },
+    scene: function (ctx, W, H, t) {
+      battleEnv(ctx, W, H, PAL.xian, [
+        [W * 0.78, H * 0.14, 12, PAL.xuan, '420'],
+        [W * 0.94, H * 0.74, 16, PAL.xuan, '1580'],
+      ], [['移速加成', '+48%'], ['伤害转化', '+36%'], ['步进', '每 4 帧 1 格'], ['卦爻', '8 向']]);
+      BUILD.momentum.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.xian, 'BEAT');
+    },
+  },
+
+  /* ── W-05 巨灵神之掌 · 崩撞 ── */
+  pinball_master: {
+    strip: [6, 11, 14, 16, 18, 21, 25, 30], key: 18,
+    decompose: [
+      { label: '双球 · 相撞体', draw: function (c) {
+        matteBall(c, -14, 0, 20, PAL.ink, PAL.xuan);
+        matteBall(c, 30, -4, 20, PAL.ink, PAL.xuan);
+      } },
+      { label: '双向箭头 · 冲量互传', draw: function (c) {
+        c.strokeStyle = PAL.xuan; c.lineWidth = 2; c.lineCap = 'square';
+        c.beginPath(); c.moveTo(-16, 0); c.lineTo(10, 0); c.stroke();
+        c.beginPath(); c.moveTo(16, 0); c.lineTo(6, -6); c.lineTo(6, 6); c.closePath();
+        c.fillStyle = PAL.xuan; c.fill();
+        c.beginPath(); c.moveTo(16, 0); c.lineTo(-10, 0); c.stroke();
+        c.beginPath(); c.moveTo(-16, 0); c.lineTo(-6, -6); c.lineTo(-6, 6); c.closePath();
+        c.fill();
+      } },
+      { label: '方印 · 撞击压痕', draw: function (c) {
+        c.strokeStyle = PAL.xuan; c.lineWidth = 2.2; c.lineJoin = 'miter';
+        c.strokeRect(-24, -24, 48, 48);
+        c.strokeStyle = rgba(PAL.ink, 0.6); c.lineWidth = 1.4;
+        c.beginPath();
+        c.moveTo(0, -24); c.lineTo(0, 24);
+        c.moveTo(-24, 0); c.lineTo(24, 0);
+        c.stroke();
+        c.strokeStyle = PAL.xuan; c.lineWidth = 2;
+        [[-24,-24],[24,-24],[-24,24],[24,24]].forEach(function (p) {
+          c.beginPath();
+          c.moveTo(p[0], p[1]); c.lineTo(p[0] + (p[0] < 0 ? 9 : -9), p[1]);
+          c.moveTo(p[0], p[1]); c.lineTo(p[0], p[1] + (p[1] < 0 ? 9 : -9));
+          c.stroke();
+        });
+      } },
+      { label: '冲量刻线 ×8 · 帧序递进', draw: function (c) {
+        c.strokeStyle = PAL.xuan; c.lineWidth = 1.6; c.lineCap = 'square';
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * TAU;
+          c.beginPath();
+          c.moveTo(Math.cos(a) * 30, Math.sin(a) * 30);
+          c.lineTo(Math.cos(a) * (30 + (i % 2 ? 10 : 16)), Math.sin(a) * (30 + (i % 2 ? 10 : 16)));
+          c.stroke();
+        }
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const cy = H * 0.48;
+      const HIT = 16;
+      const cx = W * 0.46;
+
+      let ax, bx;
+      if (f < HIT) {
+        const k = f / HIT;
+        const gap = 150 - k * 150;
+        ax = cx - gap / 2;
+        bx = cx + gap / 2;
+      } else {
+        ax = cx - 21; bx = cx + 21;
+      }
+
+      // 接触帧的严格比例压扁
+      const squash = (f === HIT) ? 1 : 0;
+      function ball(x, y, dir) {
+        ctx.save();
+        ctx.translate(x, y);
+        if (squash) ctx.scale(0.72 + dir * 0.28, 1.28 - dir * 0.28);
+        matteBall(ctx, 0, 0, 20, PAL.ink, PAL.xuan);
+        ctx.restore();
+        ctx.save();
+        ctx.font = '800 12px "Inter",sans-serif'; ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('740', x, y);
+        ctx.restore();
+      }
+      ball(ax, cy, -1);
+      ball(bx, cy - 3, 1);
+
+      if (f >= HIT) {
+        const k = f - HIT;
+        // 掌印：4 帧内每帧旋转 +15°、放大 1.25×
+        const kk = Math.min(1, k / 4);
+        ctx.save();
+        ctx.globalAlpha = k < 4 ? 1 : Math.max(0, 1 - (k - 4) / 14);
+        ctx.translate(cx, cy - 1);
+        ctx.rotate(k * 0.26);
+        const sz = 18 + kk * 12;
+        ctx.strokeStyle = PAL.xuan; ctx.lineWidth = 2.4; ctx.lineJoin = 'miter';
+        ctx.strokeRect(-sz, -sz, sz * 2, sz * 2);
+        ctx.strokeStyle = rgba(PAL.ink, 0.55); ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-sz, 0); ctx.lineTo(sz, 0);
+        ctx.moveTo(0, -sz); ctx.lineTo(0, sz);
+        ctx.stroke();
+        ctx.restore();
+
+        // 8 条冲量刻线，长度按帧递增
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - k / 18);
+        radialTicks(ctx, cx, cy - 1, 30, 30 + Math.min(22, k * 3), 8, PAL.xuan, 1.8, 0.39);
+        ctx.restore();
+
+        // 余波：4 段离散弧，每帧半径 +14px
+        if (k > 1) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1 - (k - 1) / 16);
+          const rr = 26 + k * 14;
+          discreteArc(ctx, cx, cy - 1, rr, -0.95, 0.95, 4, rgba(PAL.ink, 0.85), 2.8);
+          discreteArc(ctx, cx, cy - 1, rr, Math.PI - 0.95, Math.PI + 0.95, 4, rgba(PAL.ink, 0.85), 2.8);
+          ctx.restore();
+        }
+      }
+
+      // 玩家球与击退轨迹
+      const px = W * 0.14, py = H * 0.80;
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.xuan, 0.4); ctx.lineWidth = 1.4; ctx.lineCap = 'square';
+      ctx.beginPath(); ctx.moveTo(px + 18, py - 6); ctx.lineTo(px + 54, py - 6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px + 18, py + 6); ctx.lineTo(px + 54, py + 6); ctx.stroke();
+      ctx.restore();
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+    },
+    scene: function (ctx, W, H, t) {
+      battleEnv(ctx, W, H, PAL.xuan, [
+        [W * 0.32, H * 0.12, 12, PAL.xuan, '380'],
+        [W * 0.86, H * 0.84, 16, PAL.xuan, '1420'],
+      ], [['击退', '+45%'], ['对撞伤害', '×2'], ['对撞经验', '×2'], ['触发速度', '150']]);
+      BUILD.pinball_master.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.xuan, 'BEAT');
+    },
+  },
+
+  /* ── W-06 天机算尽 · 归零劫 ── */
+  exact_hunter: {
+    strip: [2, 8, 13, 16, 19, 22, 24, 31], key: 24,
+    decompose: [
+      { label: '圆规头 · 测量基准', draw: function (c) {
+        c.beginPath(); c.arc(0, -14, 24, 0, TAU);
+        c.lineWidth = 2.2; c.strokeStyle = PAL.xian; c.stroke();
+        c.strokeStyle = PAL.ink; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(0, 10); c.lineTo(0, 34); c.stroke();
+        c.beginPath(); c.moveTo(-12, 34); c.lineTo(12, 34); c.stroke();
+      } },
+      { label: '卡尺 ×2 · 逐格夹紧', draw: function (c) {
+        c.strokeStyle = PAL.xian; c.lineWidth = 1.6; c.lineCap = 'square';
+        c.beginPath(); c.moveTo(-30, -16); c.lineTo(30, -16); c.stroke();
+        c.beginPath(); c.moveTo(-30, 16); c.lineTo(30, 16); c.stroke();
+        c.lineWidth = 2;
+        [-30, 30].forEach(function (x) {
+          c.beginPath(); c.moveTo(x, -16); c.lineTo(x, -23); c.stroke();
+          c.beginPath(); c.moveTo(x, 16); c.lineTo(x, 23); c.stroke();
+        });
+      } },
+      { label: '端齿 ×4 · 测量端点', draw: function (c) {
+        c.strokeStyle = rgba(PAL.ink, 0.8); c.lineWidth = 2; c.lineCap = 'square';
+        for (let i = 0; i < 4; i++) {
+          const x = -24 + i * 16;
+          c.beginPath(); c.moveTo(x, -7); c.lineTo(x, 7); c.stroke();
+        }
+      } },
+      { label: '三层金环 · 帧序收缩', draw: function (c) {
+        for (let i = 0; i < 3; i++) {
+          c.beginPath(); c.arc(0, 0, 30 - i * 9, 0, TAU);
+          c.strokeStyle = i === 0 ? rgba(PAL.goldInk, 0.5) : PAL.goldInk;
+          c.lineWidth = 3 - i * 0.6; c.stroke();
+        }
+        c.strokeStyle = rgba(PAL.ink, 0.6); c.lineWidth = 1.6;
+        c.beginPath();
+        c.moveTo(-30, 0); c.lineTo(-10, 0);
+        c.moveTo(10, 0); c.lineTo(30, 0);
+        c.moveTo(0, -30); c.lineTo(0, -10);
+        c.moveTo(0, 10); c.lineTo(0, 30);
+        c.stroke();
+      } },
+    ],
+    focus: function (ctx, W, H, t) {
+      const f = frameOf(t);
+      const ex = W * 0.56, ey = H * 0.46;
+      const DEC = 16;   // 归零起始帧
+      const LOCK = 15;  // 夹紧完成帧
+
+      // 卡尺每帧跳 4px
+      const gap = Math.max(14, 52 - Math.min(LOCK, f) * 4);
+      caliper(ctx, ex, ey - gap, 46, PAL.xian, 1.6);
+      caliper(ctx, ex, ey + gap, 46, PAL.xian, 1.6);
+
+      // 血量数字逐位递减
+      let hp = 96;
+      if (f >= DEC) hp = Math.max(0, 96 - (f - DEC) * 12);
+      const zero = f >= DEC + 8;
+
+      matteBall(ctx, ex, ey, 22, zero ? PAL.ink : PAL.xuan, PAL.ink);
+      ctx.save();
+      ctx.font = '800 ' + (zero ? 18 : 15) + 'px "Inter",sans-serif';
+      ctx.fillStyle = zero ? PAL.goldInk : '#fff';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(hp), ex, ey);
+      ctx.restore();
+
+      if (zero) {
+        const k = (f - DEC - 8) / 6;
+        // 三层金环由外向内帧序收缩
+        for (let i = 0; i < 3; i++) {
+          const kk = k * 3 - i;
+          if (kk <= 0) continue;
+          const kk3 = Math.min(1, kk);
+          ctx.save();
+          ctx.globalAlpha = 1 - kk3;
+          ctx.strokeStyle = PAL.goldInk; ctx.lineWidth = 3 * (1 - kk3) + 0.8;
+          ctx.beginPath(); ctx.arc(ex, ey, 28 + kk3 * 84, 0, TAU); ctx.stroke();
+          ctx.restore();
+        }
+        // 十字解构线四向射出
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - k * 0.8);
+        ctx.strokeStyle = rgba(PAL.ink, 0.7); ctx.lineWidth = 1.8; ctx.lineCap = 'square';
+        const L = 26 + Math.min(30, (f - DEC - 8) * 6);
+        ctx.beginPath();
+        ctx.moveTo(ex - L, ey); ctx.lineTo(ex - 12, ey);
+        ctx.moveTo(ex + 12, ey); ctx.lineTo(ex + L, ey);
+        ctx.moveTo(ex, ey - L); ctx.lineTo(ex, ey - 12);
+        ctx.moveTo(ex, ey + 12); ctx.lineTo(ex, ey + L);
+        ctx.stroke();
+        ctx.restore();
+        if (f - DEC - 8 < 4) {
+          ctx.save();
+          ctx.globalAlpha = 1 - (f - DEC - 8) / 4;
+          ctx.font = '800 16px "Inter",sans-serif'; ctx.fillStyle = PAL.goldInk;
+          ctx.textAlign = 'center';
+          ctx.fillText('✦ 归零', ex, ey - 54);
+          ctx.restore();
+        }
+      }
+
+      // 玩家球与弹道
+      const px = W * 0.20, py = H * 0.74;
+      matteBall(ctx, px, py, 13, PAL.blue, PAL.ink);
+      ctx.save();
+      ctx.strokeStyle = rgba(PAL.ink, 0.45); ctx.lineWidth = 1.4; ctx.lineCap = 'square';
+      ctx.beginPath(); ctx.moveTo(px + 18, py); ctx.lineTo(px + 60, py); ctx.stroke();
+      ctx.font = '800 12px "Inter",sans-serif'; ctx.fillStyle = PAL.ink;
+      ctx.textAlign = 'center';
+      ctx.fillText('240', px + 72, py);
+      ctx.restore();
+    },
+    scene: function (ctx, W, H, t) {
+      battleEnv(ctx, W, H, PAL.goldInk, [
+        [W * 0.84, H * 0.18, 12, PAL.xuan, '380'],
+        [W * 0.26, H * 0.16, 14, PAL.xuan, '760'],
+      ], [['锁定阈值', '1.25×'], ['归零经验', '×2'], ['归零环', 'r 80'], ['卡尺', '4px/帧']]);
+      BUILD.exact_hunter.focus(ctx, W, H, t);
+      clockDial(ctx, W - 46, 44, 26, t, PAL.goldInk, 'BEAT');
+    },
+  },
+};
+
+Object.keys(BUILD).forEach(function (k) {
+  const notes = PART_NOTES[k];
+  const scales = PART_SCALE[k];
+  BUILD[k].decompose.forEach(function (p, i) {
+    if (notes) p.note = notes[i];
+    if (scales) p.sc = scales[i];
+  });
+});
+
+/* ══════════════ 战场环境 ══════════════ */
+function battleEnv(ctx, W, H, accent, enemies, gauge) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,0.13)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 5]);
+  [0.26, 0.52, 0.78].forEach(function (k) {
+    ctx.beginPath(); ctx.moveTo(0, H * k); ctx.lineTo(W, H * k); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  enemies.forEach(function (e) {
+    matteBall(ctx, e[0], e[1], e[2], e[3] || PAL.xuan, PAL.ink);
+    ctx.save();
+    ctx.font = '800 ' + Math.max(11, e[2] * 0.72) + 'px "Inter",sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(e[4], e[0], e[1]);
+    ctx.restore();
+  });
+
+  gaugeBox(ctx, 16, 16, 180, gauge, accent);
+}
+
+/* ══════════════ 画布装配 ══════════════ */
+const PLATE_RATIO = { A: 1240 / 760, B: 980 / 760, C: 8 / 1.45 };
+const plates = {};
+
+function setupPlates() {
+  ['A', 'B', 'C'].forEach(function (k) {
+    const cv = document.getElementById('plate' + k);
+    plates[k] = { cv: cv, ctx: cv.getContext('2d'), W: 0, H: 0 };
+  });
+  resizePlates();
+}
+
+function resizePlates() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  ['A', 'B', 'C'].forEach(function (k) {
+    const p = plates[k];
+    const cw = Math.max(300, Math.round(p.cv.clientWidth || (k === 'A' ? 1240 : k === 'B' ? 980 : 1600)));
+    const ch = Math.round(cw / PLATE_RATIO[k]);
+    p.cv.width = Math.round(cw * dpr);
+    p.cv.height = Math.round(ch * dpr);
+    p.cv.style.height = ch + 'px';
+    p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    p.W = cw; p.H = ch;
+  });
+  drawPlateA(WEAPONS[cur], plates.A.ctx, plates.A.W, plates.A.H);
+  drawPlateB(WEAPONS[cur], plates.B.ctx, plates.B.W, plates.B.H);
+  drawPlateC(WEAPONS[cur], plates.C.ctx, plates.C.W, plates.C.H);
+}
+
+/* ══════════════ 图纸 A：几何分解 ══════════════ */
+function drawPlateA(w, ctx, W, H) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = PAL.paper;
+  ctx.fillRect(0, 0, W, H);
+  plateGrid(ctx, W, H, 64, 0.055);
+
+  // 竖向色版条：瑞士版式的重量（色块 | 留白 | 墨线）
+  solidBlock(ctx, 0, 0, 9, H, w.color);
+  solidBlock(ctx, 14, 0, 2, H, PAL.ink);
+
+  const parts = BUILD[w.id].decompose;
+  const n = parts.length;
+  const M = 54;
+  const slotW = (W - M * 2) / n;
+  const baseY = H * 0.34;
+  const SC = Math.min(2.3, Math.max(1.0, slotW / 112));
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,0.26)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([14, 7, 2, 7]);
+  ctx.beginPath();
+  ctx.moveTo(M - 18, baseY); ctx.lineTo(W - M + 18, baseY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  arrow(ctx, M - 18, baseY, Math.PI, 16, 'rgba(17,19,21,0.42)', 1.2);
+  arrow(ctx, W - M + 18, baseY, 0, 16, 'rgba(17,19,21,0.42)', 1.2);
+  ctx.font = '800 9.5px "Inter",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.restore();
+
+  parts.forEach(function (p, i) {
+    const cx = M + slotW * (i + 0.5);
+
+    // 零件底衬：淡墨色块，制造层次
+    ctx.save();
+    ctx.fillStyle = 'rgba(17,19,21,0.05)';
+    ctx.fillRect(cx - slotW / 2 + 8, baseY - 74, slotW - 16, 148);
+    ctx.strokeStyle = 'rgba(17,19,21,0.11)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - slotW / 2 + 8.5, baseY - 73.5, slotW - 17, 147);
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(17,19,21,0.22)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(cx, baseY + 96); ctx.lineTo(cx, H * 0.60);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(cx, baseY);
+    const ps = SC * (p.sc || 1);
+    ctx.scale(ps, ps);
+    p.draw(ctx, w);
+    ctx.restore();
+
+    labelPlate(ctx, cx, H * 0.60, String(i + 1).padStart(2, '0'), p.label, p.note, w.color, Math.min(slotW - 14, 262));
+  });
+
+  ctx.save();
+  ctx.font = '800 13px "Inter","PingFang SC",sans-serif';
+  ctx.fillStyle = 'rgba(17,19,21,0.42)';
+  ctx.textAlign = 'right';
+  ctx.fillText('FIG. ' + w.no + ' —  ' + w.id.toUpperCase(), W - 22, 34);
+  ctx.font = '600 10.5px "Inter",sans-serif';
+  ctx.fillStyle = 'rgba(17,19,21,0.28)';
+  ctx.fillText('SCALE 1:1  ·  GRID 64px  ·  ' + n + ' COMPONENTS  ·  EXPLODED ALONG AXIS 00', W - 22, 54);
+  ctx.restore();
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,0.5)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(M, H - 40); ctx.lineTo(M + 120, H - 40);
+  ctx.stroke();
+  [0, 1, 2].forEach(function (i) {
+    ctx.beginPath();
+    ctx.moveTo(M + i * 60, H - 45); ctx.lineTo(M + i * 60, H - 35);
+    ctx.stroke();
+  });
+  ctx.font = '700 10px "Inter",sans-serif';
+  ctx.fillStyle = 'rgba(17,19,21,0.5)';
+  ctx.textAlign = 'left';
+  ctx.fillText('0', M - 4, H - 50);
+  ctx.fillText('120 px', M + 92, H - 50);
+  ctx.restore();
+
+  paperGrain(ctx, W, H);
+}
+
+/* ══════════════ 图纸 B：动态主画面 ══════════════ */
+let animT = 0;
+let showGrid = true;
+let animOn = true;
+
+function drawPlateB(w, ctx, W, H) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = PAL.paper;
+  ctx.fillRect(0, 0, W, H);
+  if (showGrid) plateGrid(ctx, W, H, 64, 0.055);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,0.22)';
+  ctx.lineWidth = 1.2;
+  for (let x = 64; x < W; x += 320) for (let y = 64; y < H; y += 320) crossTick(ctx, x, y, 5);
+  ctx.restore();
+  BUILD[w.id].scene(ctx, W, H, animT);
+
+  // 基线：1px 墨线 + 左侧实色起点块（版式锚点）
+  ctx.save();
+  ctx.strokeStyle = 'rgba(17,19,21,0.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, H - 10.5); ctx.lineTo(W, H - 10.5); ctx.stroke();
+  ctx.restore();
+  solidBlock(ctx, 0, H - 10, 74, 10, w.color);
+
+  // 右下角版式锚点：实色编号块
+  solidBlock(ctx, W - 46, H - 46, 46, 46, w.color);
+  ctx.save();
+  ctx.font = '800 13px "Inter",sans-serif';
+  ctx.fillStyle = '#FBFAF6';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('W-' + w.no, W - 23, H - 23);
+  ctx.restore();
+
+  paperGrain(ctx, W, H);
+}
+
+/* ══════════════ 图纸 C：运动研究带（8 帧离散序列） ══════════════ */
+let stripCanvas = null, stripCtx = null;
+
+function drawPlateC(w, ctx, W, H) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = PAL.paper;
+  ctx.fillRect(0, 0, W, H);
+
+  const frames = BUILD[w.id].strip;
+  const pad = 8;
+  const headH = 22;
+  const footH = 26;
+  const cellW = (W - pad * 2) / frames.length;
+  const cellH = H - headH - footH - pad * 2;
+
+  // 离屏采样画布
+  if (!stripCanvas) {
+    stripCanvas = document.createElement('canvas');
+    stripCtx = stripCanvas.getContext('2d');
+  }
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const sw = Math.round(cellW - 6), sh = Math.round(cellH - 6);
+  if (stripCanvas.width !== Math.round(sw * dpr)) {
+    stripCanvas.width = Math.round(sw * dpr);
+    stripCanvas.height = Math.round(sh * dpr);
+  }
+  stripCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  frames.forEach(function (fr, i) {
+    const x = pad + i * cellW;
+    const isKey = fr === BUILD[w.id].key;
+
+    // 标题条：实色块 + 反白字
+    ctx.save();
+    ctx.fillStyle = isKey ? w.color : 'rgba(17,19,21,0.11)';
+    ctx.fillRect(x + 3, headH - 15, cellW - 6, 16);
+    ctx.font = '800 9.5px "Inter",sans-serif';
+    ctx.fillStyle = isKey ? '#FBFAF6' : 'rgba(17,19,21,0.74)';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('F' + String(fr).padStart(2, '0'), x + 7, headH - 7);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = isKey ? 'rgba(255,255,255,0.92)' : 'rgba(17,19,21,0.46)';
+    ctx.fillText((fr * 180) + 'ms', x + cellW - 9, headH - 7);
+    ctx.restore();
+
+    // 单帧渲染
+    stripCtx.clearRect(0, 0, sw, sh);
+    stripCtx.fillStyle = '#FFFFFF';
+    stripCtx.fillRect(0, 0, sw, sh);
+    stripCtx.strokeStyle = 'rgba(17,19,21,0.06)';
+    stripCtx.lineWidth = 1;
+    stripCtx.beginPath();
+    for (let gx = 0; gx < sw; gx += 32) { stripCtx.moveTo(gx, 0); stripCtx.lineTo(gx, sh); }
+    for (let gy = 0; gy < sh; gy += 32) { stripCtx.moveTo(0, gy); stripCtx.lineTo(sw, gy); }
+    stripCtx.stroke();
+    BUILD[w.id].focus(stripCtx, sw, sh, fr * BEAT);
+    // 单帧纸纹
+    stripCtx.save();
+    stripCtx.globalAlpha = 0.55;
+    stripCtx.fillStyle = stripCtx.createPattern(getGrainTile(), 'repeat');
+    stripCtx.fillRect(0, 0, sw, sh);
+    stripCtx.restore();
+
+    ctx.drawImage(stripCanvas, x + 3, headH + pad, sw, sh);
+
+    // 帧格
+    ctx.save();
+    ctx.strokeStyle = 'rgba(17,19,21,0.22)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 3.5, headH + pad + 0.5, sw - 1, sh - 1);
+    if (isKey) {
+      ctx.strokeStyle = w.color;
+      ctx.lineWidth = 2.6;
+      ctx.strokeRect(x + 2.5, headH + pad - 0.5, sw + 2, sh + 1);
+    }
+    ctx.restore();
+
+    // 底部：12 格微型节拍条，标记当前节拍
+    ctx.save();
+    const bw = 66, bh = 4;
+    const bx = x + cellW / 2 - bw / 2, by = headH + pad + sh + 9;
+    const beat = fr % 12;
+    for (let i = 0; i < 12; i++) {
+      const on = i === beat;
+      ctx.fillStyle = on ? w.color : 'rgba(17,19,21,0.16)';
+      ctx.fillRect(bx + i * (bw / 12), by, bw / 12 - 1.2, bh);
+    }
+    ctx.font = '800 8px "Inter",sans-serif';
+    ctx.fillStyle = rgba(PAL.ink, 0.42);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('BEAT ' + String(beat).padStart(2, '0'), x + cellW / 2, by + 7);
+    ctx.restore();
+  });
+
+  // 底部说明
+  ctx.save();
+  ctx.font = '800 9.5px "Inter","PingFang SC",sans-serif';
+  ctx.fillStyle = 'rgba(17,19,21,0.50)';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('DISCRETE FRAME SEQUENCE  ·  帧长 180ms  ·  32 帧循环  ·  KEY FRAME 为标志性帧', pad + 2, H - 6);
+  ctx.restore();
+
+  paperGrain(ctx, W, H);
+}
+
+/* ══════════════ 侧栏装配 ══════════════ */
+const INKCHIPS = [
+  ['纸', PAL.paper, '底'],
+  ['墨 100', PAL.ink, '正文'],
+  ['墨 60', PAL.ink60, '次级'],
+  ['墨 30', PAL.ink30, '三级'],
+  ['墨 12', PAL.ink12, '底纹'],
+  ['钴蓝', PAL.blue, '玩家'],
+  ['青碧', PAL.xian, '仙侠'],
+  ['深靛', PAL.norse, '北欧'],
+  ['朱红', PAL.xuan, '玄幻'],
+  ['黄铜', PAL.arcane, '奥术'],
+  ['暗金', PAL.brass, '强调'],
+];
+const STROKES = [
+  ['0.8px 辅助线 / 网格', 0.8, 'dashed'],
+  ['1.4px 常规轮廓', 1.4, 'solid'],
+  ['2.2px 主形体', 2.2, 'solid'],
+  ['3.5px 强调 / 爆发', 3.5, 'solid'],
+];
+
+function buildSidebar() {
+  document.getElementById('wlist').innerHTML = WEAPONS.map(function (w, i) {
+    return '<button class="witem' + (i === 0 ? ' on' : '') + '" data-i="' + i + '" style="--accent:' + w.color + '">' +
+      '<div class="witem-top"><span class="witem-no">W-' + w.no + '</span><span class="witem-key">[' + w.key + ']</span></div>' +
+      '<div class="witem-name">' + w.name + '</div>' +
+      '<div class="witem-sub">' + w.faction + ' · ' + w.sub + '</div>' +
+      '</button>';
+  }).join('');
+
+  document.getElementById('inkbars').innerHTML = INKCHIPS.map(function (s) {
+    return '<div class="inkbar"><i style="background:' + s[1] + '"></i>' +
+      '<span>' + s[0] + '<em>' + s[2] + '</em></span></div>';
+  }).join('');
+
+  document.getElementById('lwrows').innerHTML = STROKES.map(function (s) {
+    return '<div class="lwrow"><i style="border-top-width:' + s[1] + 'px;border-top-style:' + s[2] + '"></i>' +
+      '<span>' + s[0] + '</span></div>';
+  }).join('');
+
+  const mf = document.getElementById('motifs');
+  const motifs = [
+    function (c, s) { c.beginPath(); c.arc(s/2, s/2, s*0.3, 0, TAU); c.stroke(); },
+    function (c, s) { c.beginPath(); for (let i=0;i<8;i++){const a=i/8*TAU-Math.PI/8;const px=s/2+Math.cos(a)*s*0.34,py=s/2+Math.sin(a)*s*0.34; i?c.lineTo(px,py):c.moveTo(px,py);} c.closePath(); c.stroke(); },
+    function (c, s) { c.beginPath(); for (let k=0;k<2;k++){ for(let i=0;i<3;i++){const a=i/3*TAU-Math.PI/2+k*Math.PI;const px=s/2+Math.cos(a)*s*0.32,py=s/2+Math.sin(a)*s*0.32; i?c.lineTo(px,py):c.moveTo(px,py);} c.closePath();} c.stroke(); },
+    function (c, s) { c.beginPath(); for(let i=0;i<3;i++){const y=s*0.28+i*s*0.22;c.moveTo(s*0.22,y);c.lineTo(s*0.5,y+s*0.1);c.lineTo(s*0.78,y);} c.stroke(); },
+    function (c, s) { c.beginPath(); c.moveTo(s*0.2,s*0.5);c.lineTo(s*0.8,s*0.5);c.moveTo(s*0.5,s*0.2);c.lineTo(s*0.5,s*0.8); c.stroke(); },
+    function (c, s) { c.beginPath(); c.rect(s*0.25,s*0.25,s*0.5,s*0.5); c.stroke(); },
+  ];
+  motifs.forEach(function (fn) {
+    const d = document.createElement('div');
+    d.className = 'motif';
+    const cv = document.createElement('canvas');
+    cv.width = 96; cv.height = 96;
+    const c = cv.getContext('2d');
+    c.strokeStyle = PAL.ink; c.lineWidth = 5; c.lineJoin = 'miter'; c.lineCap = 'square';
+    fn(c, 96);
+    d.appendChild(cv);
+    mf.appendChild(d);
+  });
+}
+
+/* ══════════════ 页面装配 ══════════════ */
+let cur = 0;
+
+function applyWeapon(i) {
+  cur = i;
+  const w = WEAPONS[i];
+  document.documentElement.style.setProperty('--accent', w.color);
+
+  document.getElementById('sheetNo').textContent = String(i + 1).padStart(2, '0') + ' / 06';
+  document.getElementById('shNo').textContent = w.no;
+  document.getElementById('shName').textContent = w.name;
+  document.getElementById('shFaction').innerHTML = '<i></i><span>' + w.faction + '</span><em>' + w.sub + '</em>';
+  document.getElementById('shDesc').innerHTML = w.tagline;
+  document.getElementById('shMeta').innerHTML =
+    '武器编号 <b>W-' + w.no + '</b><br>配置键 <b>' + w.id + '</b><br>' +
+    '主色 <b>' + w.color.toUpperCase() + '</b><br>快捷键 <b>' + w.key + '</b>';
+
+  const svgFull = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="square" stroke-linejoin="miter">' + w.svg + '</svg>';
+  document.getElementById('iconBig').innerHTML = svgFull.replace('width="30" height="30"', 'width="38" height="38"');
+  document.getElementById('iconMid').innerHTML = svgFull;
+  document.getElementById('iconSml').innerHTML = svgFull.replace('width="30" height="30"', 'width="15" height="15"');
+  document.getElementById('svgSrc').textContent = w.svg;
+
+  document.getElementById('palStrip').innerHTML = w.palette.map(function (p) {
+    return '<div class="pal' + (p[2] ? ' light' : '') + '" style="background:' + p[1] + '"><span>' + p[0] + '</span></div>';
+  }).join('');
+
+  document.getElementById('specTable').innerHTML = w.spec.map(function (r) {
+    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+  }).join('');
+
+  document.getElementById('compTable').innerHTML = w.comp.map(function (r) {
+    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+  }).join('');
+
+  document.getElementById('landBody').innerHTML = w.land.map(function (r) {
+    const cls = r[1] === 'new' ? 'new' : (r[1] === 'edit' ? 'edit' : 'now');
+    const lab = r[1] === 'new' ? '新增' : (r[1] === 'edit' ? '改造' : '已就位');
+    return '<tr><td><code>' + r[0] + '</code></td><td><span class="tag ' + cls + '">' + lab + '</span></td><td>' + r[2] + '</td></tr>';
+  }).join('');
+
+  document.querySelectorAll('.witem').forEach(function (b, bi) { b.classList.toggle('on', bi === i); });
+
+  drawPlateA(w, plates.A.ctx, plates.A.W, plates.A.H);
+  drawPlateB(w, plates.B.ctx, plates.B.W, plates.B.H);
+  drawPlateC(w, plates.C.ctx, plates.C.W, plates.C.H);
+}
+
+function loop() {
+  if (animOn) animT += 0.016;
+  drawPlateB(WEAPONS[cur], plates.B.ctx, plates.B.W, plates.B.H);
+  requestAnimationFrame(loop);
+}
+
+buildSidebar();
+setupPlates();
+applyWeapon(0);
+loop();
+
+let resizeT = null;
+window.addEventListener('resize', function () {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(resizePlates, 140);
+});
+
+document.getElementById('wlist').addEventListener('click', function (e) {
+  const b = e.target.closest('.witem');
+  if (!b) return;
+  animT = 0;
+  applyWeapon(+b.dataset.i);
+});
+
+document.getElementById('btnGrid').addEventListener('click', function () {
+  showGrid = !showGrid;
+  this.classList.toggle('on', showGrid);
+});
+document.getElementById('btnAnim').addEventListener('click', function () {
+  animOn = !animOn;
+  this.classList.toggle('on', animOn);
+});
+document.getElementById('btnCopy').addEventListener('click', function () {
+  const t = WEAPONS[cur].svg;
+  const btn = this;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function () {
+      btn.textContent = '已复制 ✓';
+      setTimeout(function () { btn.textContent = '复制 SVG 路径'; }, 1400);
+    });
+  } else {
+    btn.textContent = '请手动复制';
+    setTimeout(function () { btn.textContent = '复制 SVG 路径'; }, 1400);
+  }
+});
+
+window.addEventListener('keydown', function (e) {
+  const k = e.key.toUpperCase();
+  for (let i = 0; i < WEAPONS.length; i++) {
+    if (WEAPONS[i].key === k) { animT = 0; applyWeapon(i); }
+  }
+});
+</script>
+</body>
+</html>

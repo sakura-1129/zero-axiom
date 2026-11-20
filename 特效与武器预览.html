@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>归零法则 · ZERO AXIOM · 四阶法则进化、小球标识与特效总览实验室 (v3.0)</title>
+<style>
+:root {
+  --bg: #F4F3EE;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-alt: #ECEAE2;
+  --ink: #111315;
+  --dim: #686E78;
+  --line: rgba(17, 19, 21, 0.14);
+  --line-strong: rgba(17, 19, 21, 0.28);
+  --cobalt: #0055FF;
+  --red: #E63312;
+  --green: #00A86B;
+  --amber: #D97706;
+  --violet: #4F3CC9;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--ink);
+  font-family: "Inter", "Helvetica Neue", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  user-select: none;
+}
+.header {
+  position: fixed; top: 14px; left: 16px; right: 16px; z-index: 30;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 4px; padding: 10px 16px;
+  box-shadow: 0 8px 24px rgba(17,19,21,0.06);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.badge { background: var(--ink); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 2px; letter-spacing: 1.5px; }
+.brand h1 { font-size: 15px; font-weight: 800; }
+.brand p { font-size: 11px; color: var(--dim); }
+
+.nav-tabs { display: flex; gap: 8px; }
+.nav-btn {
+  cursor: pointer; padding: 8px 14px; font-size: 12px; font-weight: 800;
+  border: 1px solid var(--line-strong); border-radius: 3px;
+  background: #fff; color: var(--ink); transition: all 0.15s;
+}
+.nav-btn.active { background: var(--cobalt); color: #fff; border-color: var(--cobalt); }
+
+.main-area {
+  position: fixed; top: 76px; left: 16px; right: 16px; bottom: 16px;
+  display: grid; grid-template-columns: 380px 1fr; gap: 14px;
+}
+.left-panel, .right-panel {
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 4px; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 8px 24px rgba(17,19,21,0.06);
+}
+.panel-head {
+  padding: 10px 14px; background: var(--surface-alt);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.item-list {
+  padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; flex: 1;
+}
+.item-btn {
+  cursor: pointer; text-align: left; padding: 9px 12px;
+  border: 1px solid var(--line); border-left: 4px solid var(--accent, var(--ink));
+  border-radius: 3px; background: #fff; transition: all 0.14s;
+}
+.item-btn.active {
+  border-color: var(--accent, var(--ink));
+  box-shadow: 0 4px 14px rgba(17,19,21,0.10);
+  transform: translateX(2px);
+}
+.item-btn b { display: block; font-size: 13px; margin-bottom: 2px; }
+.item-btn span { font-size: 11px; color: var(--dim); }
+
+.blueprint-box {
+  border-top: 1px solid var(--line); padding: 10px 12px; background: #F7F6F2;
+}
+#blueprintCanvas { width: 100%; height: 150px; display: block; cursor: pointer; }
+.spec-card {
+  margin-top: 8px; padding: 10px; background: #fff; border: 1px solid var(--line); border-radius: 3px;
+  font-size: 12px; line-height: 1.5;
+}
+.spec-card strong { color: var(--cobalt); }
+
+.stage-wrap { position: relative; flex: 1; width: 100%; height: 100%; }
+#combatCanvas { width: 100%; height: 100%; display: block; }
+.stage-overlay {
+  position: absolute; top: 12px; left: 14px; right: 14px;
+  display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+}
+.stage-Controls { display: flex; gap: 8px; pointer-events: auto; }
+.st-pill {
+  cursor: pointer; padding: 6px 12px; font-size: 12px; font-weight: 800;
+  border: 1px solid var(--line-strong); border-radius: 3px;
+  background: rgba(255,255,255,0.92); color: var(--ink);
+}
+.st-pill.active { background: var(--ink); color: #fff; }
+.act-btn {
+  pointer-events: auto; cursor: pointer; padding: 7px 14px; font-size: 12px; font-weight: 800;
+  border: none; border-radius: 3px; background: var(--red); color: #fff;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <span class="badge">DESIGN SPEC · v3.0</span>
+    <div>
+      <h1>《归零法则 · ZERO AXIOM》四阶成长路径 · 小球几何标识 · 双极叠加态总览实验室</h1>
+      <p>包含：Ⅰ阶初态 → Ⅱ阶中间形态 → Ⅲ阶终极觉醒 → Ⅳ阶双终极叠加态 & 战场新机制（供研发直接复用 Canvas 2D 函数）</p>
+    </div>
+  </div>
+  <div class="nav-tabs" id="topTabs">
+    <button class="nav-btn active" data-tab="progression">模块 A · 三阶成长路径与小球标识</button>
+    <button class="nav-btn" data-tab="superposition">模块 B · Ⅳ阶双终极叠加态 (1+1=质变)</button>
+  </div>
+</div>
+
+<div class="main-area">
+  <div class="left-panel">
+    <div class="panel-head">
+      <span id="leftTitle">SELECT ARCHETYPE · 选择核心流派</span>
+      <span id="leftCode">XIAN</span>
+    </div>
+    <div class="item-list" id="itemList"></div>
+    <div class="blueprint-box">
+      <div style="font-size:11px;font-weight:800;color:var(--dim);margin-bottom:4px;" id="bpLabel">BALL INSIGNIA BLUEPRINT · 点击球体切换阶段</div>
+      <canvas id="blueprintCanvas"></canvas>
+      <div class="spec-card" id="specCard"></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="stage-wrap">
+      <canvas id="combatCanvas"></canvas>
+      <div class="stage-overlay">
+        <div class="stage-Controls" id="stagePills">
+          <button class="st-pill" data-st="0">Ⅰ阶 · 初始胚体 (Lv.1-2)</button>
+          <button class="st-pill active" data-st="1">Ⅱ阶 · 中间形态 ★ (Lv.3-4)</button>
+          <button class="st-pill" data-st="2">Ⅲ阶 · 终极觉醒 (Lv.5)</button>
+        </div>
+        <button class="act-btn" id="btnTrigger">⚡ 触发当前阶大招 (Space)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const TAU = Math.PI * 2;
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const distSq = (x1, y1, x2, y2) => (x1 - x2) ** 2 + (y1 - y2) ** 2;
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+}
+
+/* ══════════════ 数据集 A：六大流派三阶成长路径与小球标识 ══════════════ */
+const ARCHETYPES = [
+  {
+    id: 'xianxia', code: 'XIAN · 国风仙侠', name: '1. 太虚剑丸 · 御剑八卦系', sub: '青冥剑胚 → 两仪剑胎 → 太虚万剑道果', color: '#00A86B',
+    stages: [
+      { name: 'Ⅰ阶 · 青冥剑胚', desc: '<b>【球心标识】</b>竖向白玉菱形剑格纹。<br><b>【机制】</b>单发青冥飞剑，基础穿透 1。' },
+      { name: 'Ⅱ阶 · 两仪剑胎 (中间形态)', desc: '<b>【球体标识】</b>旋转黑白太极双鱼纹 + 外圈 4 枚十字短剑刻度标。<br><b>【中期质变】</b>解锁 1 颗护体金丹；飞剑首次命中自动分裂出 2 道微型子剑气！' },
+      { name: 'Ⅲ阶 · 太虚万剑道果 (满级觉醒)', desc: '<b>【球体标识】</b>双层交错八角剑阵徽记 + 脚下完整八卦罗盘与黑白双金丹。<br><b>【终极质变】</b>齐射 3 柄追踪飞剑，周期性绽放「八瓣几何青莲剑阵」全屏切割！' }
+    ]
+  },
+  {
+    id: 'norse', code: 'NORSE · 北欧神话', name: '2. 雷神炉心 · 天降雷柱系', sub: '卢恩雷石 → 锻铁雷锤核 → 诸神黄昏炉心', color: '#4F3CC9',
+    stages: [
+      { name: 'Ⅰ阶 · 卢恩雷石', desc: '<b>【球心标识】</b>单道「ᛋ (Sowilo)」闪电折线纹。<br><b>【机制】</b>发射雷球，命中触发 1 跳短距微弱电弧。' },
+      { name: 'Ⅱ阶 · 锻铁雷锤核 (中间形态)', desc: '<b>【球体标识】</b>T型雷锤图腾 + 外圈环绕 3 枚旋转三角引雷针。<br><b>【中期质变】</b>普攻化为旋转战锤，飞行途中向两侧敌球持续放电，落点烙印四角雷印！' },
+      { name: 'Ⅲ阶 · 诸神黄昏炉心 (满级觉醒)', desc: '<b>【球体标识】</b>奥丁八角米字死棘金纹 + 6 枚黄金引雷针。<br><b>【终极质变】</b>命中直接劈下粗壮「黑蓝双层天降雷柱」并展开「八角卢恩法阵」！' }
+    ]
+  },
+  {
+    id: 'xuanhuan', code: 'XUAN · 东方玄幻', name: '3. 焚天帝丹 · 异火黑洞系', sub: '赤炎丹胚 → 子母双色灵丹 → 佛怒火莲圣体', color: '#E63312',
+    stages: [
+      { name: 'Ⅰ阶 · 赤炎丹胚', desc: '<b>【球心标识】</b>单枚赤白实心火种圆核。<br><b>【机制】</b>发射普通赤火弹，命中产生单层小火环。' },
+      { name: 'Ⅱ阶 · 子母双色灵丹 (中间形态)', desc: '<b>【球体标识】</b>红金反转四角星纹 + 黑曜内圈 + 外旋赤色方框。<br><b>【中期质变】</b>火弹外嵌旋转方框，命中展开「双层十字火框」并灼烧地面！' },
+      { name: 'Ⅲ阶 · 佛怒火莲圣体 (满级觉醒)', desc: '<b>【球体标识】</b>三层八瓣火莲圣纹 + 红金黑双层反转八角框。<br><b>【终极质变】</b>绽放红/金/黑三层旋转火莲，大招召唤「鲲鹏黑洞」强行聚怪内爆！' }
+    ]
+  },
+  {
+    id: 'arcane', code: 'ARCANE · 英式奥术', name: '4. 阿瓦隆星盘 · 棱镜激光系', sub: '学徒星徽 → 所罗门六芒核 → 大魔导天球仪', color: '#D97706',
+    stages: [
+      { name: 'Ⅰ阶 · 学徒星徽', desc: '<b>【球心标识】</b>单线正三角炼金符号。<br><b>【机制】</b>发射奥术弹，在敌人之间普通弹射。' },
+      { name: 'Ⅱ阶 · 所罗门六芒核 (中间形态)', desc: '<b>【球体标识】</b>黑白交错所罗门六芒星 + 左右伴飞 2 枚微型三角棱镜。<br><b>【中期质变】</b>首次命中敌球时原地生成持续 2s 的「临时三角折射镜」发射细激光！' },
+      { name: 'Ⅲ阶 · 大魔导天球仪 (满级觉醒)', desc: '<b>【球体标识】</b>黄金星象仪经纬环 + 场上常驻 4 座六芒星棱镜节点。<br><b>【终极质变】</b>发射「黑金双层高对比度贯穿激光」在镜面与敌球间无限连环折射！' }
+    ]
+  },
+  {
+    id: 'billiard', code: 'PHYS · 台球物理', name: '5. 大师母球 · 连环碰撞系', sub: '纯白母球 → 黑八配重核 → 黄金陀螺撞针', color: '#111315',
+    stages: [
+      { name: 'Ⅰ阶 · 纯白母球', desc: '<b>【球心标识】</b>纯白哑光球面 + 朱红圆点母球标。<br><b>【机制】</b>发射带基础击退的重弹推开敌球。' },
+      { name: 'Ⅱ阶 · 黑八配重核 (中间形态)', desc: '<b>【球体标识】</b>贯穿式宽幅黑八配重带 + 白芯数字 8 + 四象限准星括弧。<br><b>【中期质变】</b>显示「台球瞄准延长线 + 撞击预测白圈」，解锁敌球之间的对撞传递！' },
+      { name: 'Ⅲ阶 · 黄金陀螺撞针 (满级觉醒)', desc: '<b>【球体标识】</b>曜石黑装甲底 + 黄金三向陀螺撞针徽记。<br><b>【终极质变】</b>敌球四周碰壁全弹性反弹，触发「连撞×2 / ×3 / ×4!」金色崩撞！' }
+    ]
+  },
+  {
+    id: 'exact_zero', code: 'MATH · 数字法则', name: '6. 天机归零 · 算术过载系', sub: '算筹原核 → 游标卡尺核 → 天道归零罗盘', color: '#0055FF',
+    stages: [
+      { name: 'Ⅰ阶 · 算筹原核', desc: '<b>【球心标识】</b>钴蓝球面内嵌二元算筹双竖线 (||)。<br><b>【机制】</b>伤害分毫不差把敌球打成 0 时触发归零震波。' },
+      { name: 'Ⅱ阶 · 游标卡尺核 (中间形态)', desc: '<b>【球体标识】</b>金色十字游标卡尺刻线 + 空心数字 0 环。<br><b>【中期质变】</b>斩杀容差放宽（残血≤1.35倍伤害自动补足为精准归零）+ 1跳溢出电弧！' },
+      { name: 'Ⅲ阶 · 天道归零罗盘 (满级觉醒)', desc: '<b>【球体标识】</b>黄金分割方框 + 四象限锁定准星。<br><b>【终极质变】</b>触发大范围金色十字坐标解构阵，且溢出伤害化为 3 跳高压电弧链！' }
+    ]
+  }
+];
+
+/* ══════════════ 数据集 B：六大【Ⅳ阶·双终极叠加态】 ══════════════ */
+const COMBOS = [
+  { id: 'xian_xuan', code: 'XIAN × XUAN', name: '1. 仙侠×玄幻【红莲业火剑仙】', sub: '飞剑刺入敌球体内直接引爆三层火莲 + 火莲金丹', a: { name: '太虚万剑', col: '#00A86B', type: 'xianxia' }, b: { name: '佛怒火莲', col: '#E63312', type: 'xuanhuan' }, desc: '<b>【叠加态标识】</b>青碧与业火红双色对半基底 + 外旋黄金八角火框 + 十六瓣双色剑莲神纹。<br><b>【1+1=质变】</b>两仪金丹化为旋转火莲丹；每柄飞剑刺中敌球时直接在体内引爆三层异色火莲！' },
+  { id: 'xian_norse', code: 'XIAN × NORSE', name: '2. 仙侠×北欧【九霄雷罚剑域】', sub: '飞剑化引雷剑桩钉入敌球 + 自动拉起卢恩电网与雷柱', a: { name: '太虚万剑', col: '#00A86B', type: 'xianxia' }, b: { name: '雷神炉心', col: '#4F3CC9', type: 'norse' }, desc: '<b>【叠加态标识】</b>青紫双色基底 + 8枚引雷剑标 + 雷锤贯穿剑格神纹。<br><b>【1+1=质变】</b>飞剑命中敌球后化作「引雷剑桩」钉在敌球身上，所有被钉敌球之间自动拉起电网并降下天降雷柱！' },
+  { id: 'norse_phys', code: 'NORSE × PHYS', name: '3. 北欧×台球【诸神雷霆保龄】', sub: '敌球化为充能雷球，每次台球对撞直接降下天降雷柱', a: { name: '雷神炉心', col: '#4F3CC9', type: 'norse' }, b: { name: '黄金撞针', col: '#111315', type: 'billiard' }, desc: '<b>【叠加态标识】</b>紫黑装甲母球 + 三向雷霆撞针核心。<br><b>【1+1=质变】</b>被撞飞的敌球本身化为充能雷球，敌球与敌球每次发生【台球对撞】时直接在碰撞点劈下天降雷柱！' },
+  { id: 'xuan_phys', code: 'XUAN × PHYS', name: '4. 玄幻×台球【奇点坍缩开球】', sub: '鲲鹏黑洞把全屏怪吸成一团 + 火莲母球一杆轰入球堆', a: { name: '佛怒火莲', col: '#E63312', type: 'xuanhuan' }, b: { name: '黄金撞针', col: '#111315', type: 'billiard' }, desc: '<b>【叠加态标识】</b>红黑双色引力母球 + 球心黑洞吞噬8号球徽记。<br><b>【1+1=质变】</b>先用鲲鹏黑洞把散怪强行聚成紧密球堆，紧接着发射重型火莲母球一杆冲入黑洞中心连环爆破！' },
+  { id: 'arcane_xian', code: 'ARCANE × XIAN', name: '5. 奥术×仙侠【所罗门分光剑阵】', sub: '飞剑穿过六芒星棱镜时，1剑光谱折射分裂为3柄黄金光剑', a: { name: '魔导天球', col: '#D97706', type: 'arcane' }, b: { name: '太虚万剑', col: '#00A86B', type: 'xianxia' }, desc: '<b>【叠加态标识】</b>秘金与青碧双色星盘 + 所罗门六芒星剑格核心。<br><b>【1+1=质变】</b>飞剑一旦穿过场地上的【六芒星棱镜】，1柄飞剑瞬间折射分裂为3柄高速黄金激光剑！' },
+  { id: 'arcane_zero', code: 'ARCANE × MATH', name: '6. 奥术×归零【宿命同调矩阵】', sub: '折射激光网同步敌球数字，1球归零则整张网同时归零殉爆', a: { name: '魔导天球', col: '#D97706', type: 'arcane' }, b: { name: '天道归零', col: '#0055FF', type: 'exact_zero' }, desc: '<b>【叠加态标识】</b>秘金与钴蓝双色天球游标环 + 六芒星内嵌数字 0 神纹。<br><b>【1+1=质变】</b>激光网连接的所有敌球血量被「宿命同调」，只要其中 1 颗触发【✦精准归零】，整张网上的敌球同时归零殉爆！' }
+];
+
+let tabMode = 'progression'; // 'progression' | 'superposition'
+let selIdx = 0;
+let curStage = 1;
+let time = 0, dpr = 1;
+
+const bpCv = document.getElementById('blueprintCanvas');
+const bpCtx = bpCv.getContext('2d');
+const cbCv = document.getElementById('combatCanvas');
+const cbCtx = cbCv.getContext('2d');
+let bpW = 340, bpH = 150, cbW = 700, cbH = 500;
+
+const player = { x: 0, y: 0, r: 18, fireT: 0, ultT: 1.8 };
+let enemies = [], bullets = [], fx = [], texts = [], mirrors = [], blackholes = [];
+
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const r1 = bpCv.getBoundingClientRect();
+  bpW = r1.width || 340; bpH = r1.height || 150;
+  bpCv.width = bpW * dpr; bpCv.height = bpH * dpr;
+  const r2 = cbCv.getBoundingClientRect();
+  cbW = r2.width || 700; cbH = r2.height || 500;
+  cbCv.width = cbW * dpr; cbCv.height = cbH * dpr;
+}
+
+/* ══════════════ 复用函数 1：绘制Ⅰ/Ⅱ/Ⅲ阶单流派小球标识 ══════════════ */
+function drawStyledOrb(ctx, x, y, r, archId, stageIdx, t) {
+  ctx.save(); ctx.translate(x, y);
+  if (archId === 'xianxia' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(t * 1.4); ctx.strokeStyle = '#00A86B'; ctx.lineWidth = 2;
+    const cnt = stageIdx === 2 ? 8 : 4;
+    for (let i = 0; i < cnt; i++) { ctx.rotate(TAU / cnt); ctx.beginPath(); ctx.moveTo(r + 3, 0); ctx.lineTo(r + (stageIdx === 2 ? 10 : 7), 0); ctx.stroke(); }
+    ctx.restore();
+  } else if (archId === 'norse' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(t * 2);
+    const cnt = stageIdx === 2 ? 6 : 3;
+    for (let i = 0; i < cnt; i++) {
+      ctx.rotate(TAU / cnt); ctx.beginPath(); ctx.moveTo(r + 9, 0); ctx.lineTo(r + 3, -3.5); ctx.lineTo(r + 3, 3.5); ctx.closePath();
+      ctx.fillStyle = stageIdx === 2 ? '#FFB800' : '#4F3CC9'; ctx.fill();
+    }
+    ctx.restore();
+  } else if (archId === 'xuanhuan' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(t * 1.5); const sz = r * 1.25;
+    ctx.strokeStyle = stageIdx === 2 ? '#FFB800' : '#E63312'; ctx.lineWidth = 1.8;
+    ctx.strokeRect(-sz, -sz, sz * 2, sz * 2);
+    if (stageIdx === 2) { ctx.rotate(Math.PI / 4); ctx.strokeStyle = '#111315'; ctx.strokeRect(-sz, -sz, sz * 2, sz * 2); }
+    ctx.restore();
+  } else if (archId === 'arcane' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(t * 1.2); ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(0, 0, r + 6, 0, TAU); ctx.stroke();
+    const cnt = stageIdx === 2 ? 4 : 2;
+    for (let i = 0; i < cnt; i++) { ctx.rotate(TAU / cnt); ctx.fillStyle = '#FFB800'; ctx.fillRect(r + 4, -2.5, 5, 5); }
+    ctx.restore();
+  } else if (archId === 'billiard' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(t * 0.6); ctx.strokeStyle = '#111315'; ctx.lineWidth = 1.8;
+    for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.arc(0, 0, r + 5, -0.35, 0.35); ctx.stroke(); }
+    ctx.restore();
+  } else if (archId === 'exact_zero' && stageIdx >= 1) {
+    ctx.save(); ctx.rotate(-t * 0.9); ctx.strokeStyle = '#0055FF'; ctx.lineWidth = 1.6;
+    const m = r + 6;
+    ctx.beginPath(); ctx.moveTo(-m, 0); ctx.lineTo(-r - 1, 0); ctx.moveTo(m, 0); ctx.lineTo(r + 1, 0);
+    ctx.moveTo(0, -m); ctx.lineTo(0, -r - 1); ctx.moveTo(0, m); ctx.lineTo(0, r + 1); ctx.stroke();
+    ctx.restore();
+  }
+
+  const baseCol = archId === 'billiard' ? (stageIdx === 2 ? '#111315' : '#FFFFFF')
+    : archId === 'xianxia' ? '#00A86B' : archId === 'norse' ? '#4F3CC9'
+    : archId === 'xuanhuan' ? '#E63312' : archId === 'arcane' ? '#FFB800' : '#0055FF';
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU);
+  ctx.fillStyle = baseCol; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = '#111315'; ctx.stroke();
+
+  const s = r * 0.58;
+  ctx.strokeStyle = '#FFFFFF'; ctx.fillStyle = '#FFFFFF'; ctx.lineWidth = 1.8;
+  if (archId === 'xianxia') {
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(s * 0.45, 0); ctx.lineTo(0, s); ctx.lineTo(-s * 0.45, 0); ctx.closePath(); ctx.stroke();
+    } else if (stageIdx === 1) {
+      ctx.rotate(t * 1.5);
+      ctx.beginPath(); ctx.arc(0, 0, s, -Math.PI / 2, Math.PI / 2); ctx.fillStyle = '#111315'; ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, s, Math.PI / 2, -Math.PI / 2); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    } else {
+      ctx.rotate(t * 1.2);
+      for (let k = 0; k < 2; k++) { ctx.rotate(Math.PI / 4); ctx.strokeRect(-s * 0.72, -s * 0.72, s * 1.44, s * 1.44); }
+    }
+  } else if (archId === 'norse') {
+    ctx.strokeStyle = stageIdx === 2 ? '#FFB800' : '#FFFFFF';
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.moveTo(s * 0.35, -s * 0.8); ctx.lineTo(-s * 0.4, 0); ctx.lineTo(s * 0.4, 0); ctx.lineTo(-s * 0.35, s * 0.8); ctx.stroke();
+    } else if (stageIdx === 1) {
+      ctx.beginPath(); ctx.rect(-s * 0.65, -s * 0.65, s * 1.3, s * 0.55); ctx.moveTo(0, -s * 0.1); ctx.lineTo(0, s * 0.85); ctx.stroke();
+    } else {
+      ctx.rotate(t * 0.9);
+      for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(0, s); ctx.stroke(); }
+    }
+  } else if (archId === 'xuanhuan') {
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.arc(0, 0, s * 0.45, 0, TAU); ctx.fill();
+    } else if (stageIdx === 1) {
+      ctx.rotate(t * 1.6); ctx.fillStyle = '#FFB800'; ctx.fillRect(-s * 0.6, -s * 0.6, s * 1.2, s * 1.2);
+      ctx.beginPath(); ctx.arc(0, 0, s * 0.3, 0, TAU); ctx.fillStyle = '#111315'; ctx.fill();
+    } else {
+      ctx.rotate(-t * 1.4); ctx.strokeStyle = '#FFB800';
+      for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 4); ctx.strokeRect(-s * 0.65, -s * 0.65, s * 1.3, s * 1.3); }
+    }
+  } else if (archId === 'arcane') {
+    ctx.strokeStyle = '#111315';
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(s * 0.85, s * 0.6); ctx.lineTo(-s * 0.85, s * 0.6); ctx.closePath(); ctx.stroke();
+    } else if (stageIdx === 1) {
+      ctx.rotate(t);
+      for (let k = 0; k < 2; k++) { ctx.rotate(Math.PI); ctx.strokeStyle = k ? '#FFFFFF' : '#111315'; ctx.beginPath(); ctx.moveTo(0, -s); ctx.lineTo(s * 0.85, s * 0.5); ctx.lineTo(-s * 0.85, s * 0.5); ctx.closePath(); ctx.stroke(); }
+    } else {
+      ctx.rotate(t * 1.5); ctx.beginPath(); ctx.arc(0, 0, s * 0.88, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, 0, s * 0.88, s * 0.36, 0, 0, TAU); ctx.stroke();
+    }
+  } else if (archId === 'billiard') {
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.26, 0, TAU); ctx.fillStyle = '#E63312'; ctx.fill();
+    } else if (stageIdx === 1) {
+      ctx.fillStyle = '#111315'; ctx.fillRect(-r * 0.9, -r * 0.4, r * 1.8, r * 0.8);
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.36, 0, TAU); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    } else {
+      ctx.rotate(t * 2.5); ctx.strokeStyle = '#FFB800';
+      for (let i = 0; i < 3; i++) { ctx.rotate(TAU / 3); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s * 0.85, 0); ctx.stroke(); }
+    }
+  } else {
+    if (stageIdx === 0) {
+      ctx.beginPath(); ctx.moveTo(-s * 0.3, -s * 0.6); ctx.lineTo(-s * 0.3, s * 0.6); ctx.moveTo(s * 0.3, -s * 0.6); ctx.lineTo(s * 0.3, s * 0.6); ctx.stroke();
+    } else if (stageIdx === 1) {
+      ctx.beginPath(); ctx.arc(0, 0, s * 0.55, 0, TAU); ctx.stroke();
+    } else {
+      ctx.rotate(t); ctx.strokeStyle = '#FFB800'; ctx.strokeRect(-s * 0.7, -s * 0.7, s * 1.4, s * 1.4);
+    }
+  }
+  ctx.restore();
+}
+
+/* ══════════════ 复用函数 2：绘制Ⅳ阶·双极叠加态小球标识 ══════════════ */
+function drawSuperpositionOrb(ctx, x, y, r, combo, t) {
+  ctx.save(); ctx.translate(x, y);
+  const colA = combo.a.col, colB = combo.b.col;
+  ctx.save(); ctx.rotate(t * 1.4);
+  const or = r * 1.3;
+  ctx.strokeStyle = colA; ctx.lineWidth = 1.8; ctx.strokeRect(-or * 0.7, -or * 0.7, or * 1.4, or * 1.4);
+  ctx.rotate(Math.PI / 4 - t * 2.8); ctx.strokeStyle = colB; ctx.strokeRect(-or * 0.7, -or * 0.7, or * 1.4, or * 1.4);
+  ctx.restore();
+
+  ctx.save(); ctx.rotate(t * 0.8);
+  ctx.beginPath(); ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2); ctx.fillStyle = colA; ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, r, Math.PI / 2, -Math.PI / 2); ctx.fillStyle = colB; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.strokeStyle = '#111315'; ctx.lineWidth = 2.2; ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.lineWidth = 2.2; ctx.strokeStyle = '#111315'; ctx.stroke();
+  const s = r * 0.6;
+  ctx.rotate(-t * 1.5); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.8;
+  ctx.strokeRect(-s * 0.68, -s * 0.68, s * 1.36, s * 1.36);
+  ctx.rotate(Math.PI / 4); ctx.strokeStyle = '#FFB800';
+  ctx.strokeRect(-s * 0.68, -s * 0.68, s * 1.36, s * 1.36);
+  ctx.restore();
+}
+
+function renderBlueprint() {
+  bpCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  bpCtx.clearRect(0, 0, bpW, bpH);
+  const cy = bpH * 0.46;
+  const xs = [bpW * 0.18, bpW * 0.50, bpW * 0.82];
+
+  if (tabMode === 'progression') {
+    const arch = ARCHETYPES[selIdx];
+    for (let i = 0; i < 2; i++) {
+      bpCtx.beginPath(); bpCtx.moveTo(xs[i] + 28, cy); bpCtx.lineTo(xs[i + 1] - 28, cy);
+      bpCtx.strokeStyle = i < curStage ? arch.color : 'rgba(17,19,21,0.2)'; bpCtx.lineWidth = 2; bpCtx.stroke();
+    }
+    const lbs = ['Ⅰ阶·初态', 'Ⅱ阶·中间态★', 'Ⅲ阶·觉醒'];
+    for (let s = 0; s < 3; s++) {
+      drawStyledOrb(bpCtx, xs[s], cy, s === curStage ? 24 : 19, arch.id, s, time);
+      bpCtx.font = (s === curStage ? '800 ' : '600 ') + '11px Inter, sans-serif';
+      bpCtx.textAlign = 'center'; bpCtx.fillStyle = '#111315';
+      bpCtx.fillText(lbs[s], xs[s], bpH - 12);
+    }
+  } else {
+    const c = COMBOS[selIdx];
+    drawStyledOrb(bpCtx, xs[0], cy, 20, c.a.type, 2, time);
+    drawStyledOrb(bpCtx, xs[1], cy, 20, c.b.type, 2, time);
+    bpCtx.font = '900 18px Inter, sans-serif'; bpCtx.textAlign = 'center'; bpCtx.fillStyle = '#111315';
+    bpCtx.fillText('+', (xs[0] + xs[1]) / 2, cy + 5);
+    bpCtx.fillText('⇒', (xs[1] + xs[2]) / 2, cy + 5);
+    drawSuperpositionOrb(bpCtx, xs[2], cy, 25, c, time);
+    bpCtx.font = '700 11px Inter, sans-serif';
+    bpCtx.fillText('Ⅲ·' + c.a.name, xs[0], bpH - 12);
+    bpCtx.fillText('Ⅲ·' + c.b.name, xs[1], bpH - 12);
+    bpCtx.fillStyle = '#E63312'; bpCtx.fillText('Ⅳ阶·叠加态', xs[2], bpH - 12);
+  }
+}
+
+function spawnEnemies(n) {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * TAU + rand(-0.1, 0.1);
+    const d = rand(110, 220);
+    enemies.push({
+      id: Math.random(),
+      x: player.x + Math.cos(a) * d, y: player.y + Math.sin(a) * d,
+      vx: 0, vy: 0, kx: 0, ky: 0, r: rand(14, 19), hp: 20, speed: rand(42, 65),
+      color: i % 3 === 0 ? '#4F3CC9' : '#E63312', flash: 0, squash: 0, squashAng: 0, collideCd: 0, dead: false
+    });
+  }
+}
+
+function findNearest(x, y, maxR, skip) {
+  let best = null, bd = maxR * maxR;
+  for (const e of enemies) {
+    if (e.dead || (skip && skip.has(e.id))) continue;
+    const d = distSq(x, y, e.x, e.y);
+    if (d < bd) { bd = d; best = e; }
+  }
+  return best;
+}
+
+function triggerUlt() {
+  fx.push({ kind: 'lotus', x: player.x, y: player.y, r: 15, maxR: 185, life: 0.55, max: 0.55, rot: 0 });
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * TAU;
+    bullets.push({ x: player.x, y: player.y, vx: Math.cos(a) * 540, vy: Math.sin(a) * 540, r: 9, dmg: 10, pierce: 2, life: 1.2, hit: new Set() });
+  }
+}
+
+function update(dt) {
+  time += dt;
+  player.x = Math.cos(time * 0.85) * 55;
+  player.y = Math.sin(time * 1.7) * 38;
+
+  player.ultT -= dt;
+  if (player.ultT <= 0) { player.ultT = 2.4; triggerUlt(); }
+
+  player.fireT -= dt;
+  if (player.fireT <= 0) {
+    player.fireT = 0.36;
+    const t = findNearest(player.x, player.y, 420);
+    const a = t ? Math.atan2(t.y - player.y, t.x - player.x) : time;
+    const cnt = (tabMode === 'superposition' || curStage >= 1) ? 2 : 1;
+    for (let i = 0; i < cnt; i++) {
+      const off = (i - (cnt - 1) / 2) * 0.16;
+      bullets.push({ x: player.x, y: player.y, vx: Math.cos(a + off) * 580, vy: Math.sin(a + off) * 580, r: 8, dmg: 8, pierce: curStage, life: 1.2, hit: new Set() });
+    }
+  }
+
+  for (const b of bullets) {
+    b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+    if (b.life <= 0) { b.dead = true; continue; }
+    for (const e of enemies) {
+      if (e.dead || b.hit.has(e.id)) continue;
+      if (distSq(b.x, b.y, e.x, e.y) <= (b.r + e.r) ** 2) {
+        b.hit.add(e.id); e.hp -= b.dmg; e.flash = 0.08; e.squash = 0.25;
+        e.squashAng = Math.atan2(b.vy, b.vx);
+        e.kx += Math.cos(e.squashAng) * 320; e.ky += Math.sin(e.squashAng) * 320;
+        fx.push({ kind: 'lotus', x: e.x, y: e.y, r: 6, maxR: 65, life: 0.38, max: 0.38, rot: rand(0, TAU) });
+        if (e.hp <= 0) e.dead = true;
+        if (b.pierce > 0) { b.pierce--; continue; }
+        b.dead = true; break;
+      }
+    }
+  }
+  bullets = bullets.filter(b => !b.dead);
+
+  for (const e of enemies) {
+    if (e.dead) continue;
+    if (e.flash > 0) e.flash -= dt;
+    if (e.squash > 0) e.squash = Math.max(0, e.squash - dt * 2.2);
+    if (e.collideCd > 0) e.collideCd -= dt;
+    const dx = player.x - e.x, dy = player.y - e.y, d = Math.hypot(dx, dy) || 1;
+    e.vx = (dx / d) * e.speed; e.vy = (dy / d) * e.speed;
+    e.kx *= Math.max(0, 1 - 5 * dt); e.ky *= Math.max(0, 1 - 5 * dt);
+    e.x += (e.vx + e.kx) * dt; e.y += (e.vy + e.ky) * dt;
+  }
+
+  for (let i = 0; i < enemies.length; i++) {
+    const a = enemies[i]; if (a.dead) continue;
+    for (let j = i + 1; j < enemies.length; j++) {
+      const b = enemies[j]; if (b.dead) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, rr = a.r + b.r, d2 = dx * dx + dy * dy;
+      if (d2 >= rr * rr || d2 < 0.01) continue;
+      const d = Math.sqrt(d2), ux = dx / d, uy = dy / d, push = (rr - d) * 0.5;
+      a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push;
+      if (Math.hypot(a.kx - b.kx, a.ky - b.ky) > 120 && a.collideCd <= 0 && b.collideCd <= 0) {
+        a.collideCd = 0.15; b.collideCd = 0.15;
+        b.kx = ux * 320; b.ky = uy * 320;
+        a.hp -= 6; b.hp -= 6;
+        if (a.hp <= 0) a.dead = true;
+        if (b.hp <= 0) b.dead = true;
+      }
+    }
+  }
+  enemies = enemies.filter(e => !e.dead);
+  if (enemies.length < 12) spawnEnemies(14);
+
+  for (const f of fx) { f.life -= dt; f.r = f.maxR * (1 - f.life / f.max); }
+  fx = fx.filter(f => f.life > 0);
+}
+
+function renderCombat() {
+  cbCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cbCtx.fillStyle = '#ECEAE2'; cbCtx.fillRect(0, 0, cbW, cbH);
+  cbCtx.beginPath();
+  for (let x = 0; x < cbW; x += 52) { cbCtx.moveTo(x, 0); cbCtx.lineTo(x, cbH); }
+  for (let y = 0; y < cbH; y += 52) { cbCtx.moveTo(0, y); cbCtx.lineTo(cbW, y); }
+  cbCtx.strokeStyle = 'rgba(17,19,21,0.05)'; cbCtx.lineWidth = 1; cbCtx.stroke();
+
+  cbCtx.save(); cbCtx.translate(cbW / 2, cbH / 2);
+
+  for (const f of fx) {
+    const a = clamp(f.life / f.max, 0, 1);
+    cbCtx.save(); cbCtx.translate(f.x, f.y); cbCtx.rotate(f.rot + (1 - a) * 1.5);
+    cbCtx.strokeStyle = rgba('#E63312', a * 0.85); cbCtx.lineWidth = 2.2;
+    cbCtx.strokeRect(-f.r * 0.7, -f.r * 0.7, f.r * 1.4, f.r * 1.4);
+    cbCtx.rotate(Math.PI / 4);
+    cbCtx.strokeStyle = rgba('#00A86B', a * 0.85);
+    cbCtx.strokeRect(-f.r * 0.7, -f.r * 0.7, f.r * 1.4, f.r * 1.4);
+    cbCtx.restore();
+  }
+
+  for (const e of enemies) {
+    cbCtx.save(); cbCtx.translate(e.x, e.y);
+    if (e.squash > 0.01) { cbCtx.rotate(e.squashAng); cbCtx.scale(1 - e.squash * 0.5, 1 + e.squash * 0.7); }
+    cbCtx.beginPath(); cbCtx.arc(0, 0, e.r, 0, TAU);
+    cbCtx.fillStyle = e.flash > 0 ? '#FFFFFF' : e.color; cbCtx.fill();
+    cbCtx.strokeStyle = '#111315'; cbCtx.lineWidth = 1.6; cbCtx.stroke();
+    cbCtx.restore();
+    cbCtx.font = '800 12px Inter, sans-serif'; cbCtx.fillStyle = '#FFFFFF'; cbCtx.textAlign = 'center'; cbCtx.textBaseline = 'middle';
+    cbCtx.fillText(String(e.hp), e.x, e.y);
+  }
+
+  for (const b of bullets) {
+    cbCtx.beginPath(); cbCtx.arc(b.x, b.y, b.r, 0, TAU);
+    cbCtx.fillStyle = '#0055FF'; cbCtx.fill(); cbCtx.strokeStyle = '#111315'; cbCtx.stroke();
+  }
+
+  if (tabMode === 'progression') {
+    drawStyledOrb(cbCtx, player.x, player.y, player.r, ARCHETYPES[selIdx].id, curStage, time);
+  } else {
+    drawSuperpositionOrb(cbCtx, player.x, player.y, player.r + 2, COMBOS[selIdx], time);
+  }
+  cbCtx.restore();
+}
+
+function refreshUI() {
+  const list = document.getElementById('itemList');
+  const data = tabMode === 'progression' ? ARCHETYPES : COMBOS;
+  list.innerHTML = data.map((it, i) =>
+    '<button class="item-btn ' + (i === selIdx ? 'active' : '') + '" data-i="' + i + '" style="--accent:' + (it.color || it.a.col) + '">' +
+      '<b>' + it.name + '</b><span>' + it.sub + '</span>' +
+    '</button>'
+  ).join('');
+
+  document.getElementById('stagePills').style.display = tabMode === 'progression' ? 'flex' : 'none';
+  if (tabMode === 'progression') {
+    const arch = ARCHETYPES[selIdx];
+    document.getElementById('leftCode').textContent = arch.code;
+    document.getElementById('specCard').innerHTML = '<strong>' + arch.stages[curStage].name + '</strong><br>' + arch.stages[curStage].desc;
+  } else {
+    const c = COMBOS[selIdx];
+    document.getElementById('leftCode').textContent = c.code;
+    document.getElementById('specCard').innerHTML = c.desc;
+  }
+  document.querySelectorAll('.st-pill').forEach((b, i) => b.classList.toggle('active', i === curStage));
+}
+
+document.getElementById('topTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  tabMode = btn.dataset.tab; selIdx = 0;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
+  refreshUI();
+});
+document.getElementById('itemList').addEventListener('click', e => {
+  const btn = e.target.closest('.item-btn');
+  if (!btn) return;
+  selIdx = Number(btn.dataset.i); refreshUI();
+});
+document.getElementById('stagePills').addEventListener('click', e => {
+  const btn = e.target.closest('.st-pill');
+  if (!btn) return;
+  curStage = Number(btn.dataset.st); refreshUI();
+});
+document.getElementById('btnTrigger').onclick = () => triggerUlt();
+
+window.addEventListener('resize', resize);
+resize();
+spawnEnemies(14);
+refreshUI();
+let last = performance.now();
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  update(dt);
+  renderBlueprint();
+  renderCombat();
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
