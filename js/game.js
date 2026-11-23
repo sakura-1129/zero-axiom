@@ -3524,7 +3524,7 @@ function addText(x, y, str, color, size, opt) {
 }
 
 function addShake(v) {
-  Game.shake = Math.min(26, Game.shake + v);
+  Game.shake = Math.min(7, Game.shake + v * 0.32);
 }
 
 function updateParticles(dt) {
