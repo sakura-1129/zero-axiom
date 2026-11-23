@@ -263,7 +263,7 @@ const SKILLS = [
     id: 'dmg', name: '焚天帝丹 · 赤炎重炮', type: 'attack', archetype: 'xuanhuan', archPts: 2, maxLv: 8, midLv: 4,
     desc: lv => ((lv || 0) >= 3 ? '基础伤害 +2 且全局伤害 ×1.38，副武器与主动技同享指数膨胀。' : '基础伤害 +1（Lv.4 起 +2）且全局伤害 ×1.38，副武器与主动技同享指数膨胀。'),
     midDesc: '【中阶 · 子母双色灵丹】弹丸体积 +18%，命中附带 70 击退与火环冲击。',
-    capstoneDesc: '【大成 · 佛怒火莲圣体】伤害额外 ×1.60；主弹丸命中首个目标引爆 95px 引力坍缩火莲（60% 范围伤）。',
+    capstoneDesc: '【高阶 · 佛怒火莲圣体】伤害额外 ×1.60；主弹丸命中首个目标引爆 95px 引力坍缩火莲（60% 范围伤）。',
     apply: (p, lv) => {
       const curLv = lv || 1;
       p.stats.dmg += (curLv >= 4 ? 2 : 1);
@@ -279,7 +279,7 @@ const SKILLS = [
     id: 'rate', name: '奥术过载咏唱', type: 'attack', archetype: 'arcane', archPts: 1, maxLv: 8, midLv: 4,
     desc: () => '射击间隔 -12%，同时缩短电弧链冷却。',
     midDesc: '【中阶 · 连发预热】每 7 次普攻后，第 8 次倾泻双倍弹幕。',
-    capstoneDesc: '【大成 · 贯穿星辉射线】第 3 次普攻起追加瞬间贯穿屏幕的几何射线，扫射命中沿途所有敌球（85% 伤）。',
+    capstoneDesc: '【高阶 · 贯穿星辉射线】第 3 次普攻起追加瞬间贯穿屏幕的几何射线，扫射命中沿途所有敌球（85% 伤）。',
     apply: (p, lv) => {
       p.stats.fireInterval *= 0.88;
       if (lv >= 4) p.stats.midRate = true;
@@ -290,7 +290,7 @@ const SKILLS = [
     id: 'multi', name: '星象仪多重齐射', type: 'attack', archetype: 'arcane', archPts: 1, maxLv: 5, midLv: 3,
     desc: () => '每次多射出 1 颗弹丸（追踪弹同步 +1）；Lv.3 起免除射速代价。',
     midDesc: '【中阶 · 收束阵列】散射角收窄 20%，且免除多重齐射的射速惩罚。',
-    capstoneDesc: '【大成 · 天球螺旋矩阵】每次射击额外释放 4 枚旋转交叉弧线弹幕，形成 360° 弹幕网。',
+    capstoneDesc: '【高阶 · 天球螺旋矩阵】每次射击额外释放 4 枚旋转交叉弧线弹幕，形成 360° 弹幕网。',
     apply: (p, lv) => {
       p.stats.bullets += 1;
       if (lv < 3) p.stats.fireInterval *= 1.12;
@@ -308,7 +308,7 @@ const SKILLS = [
     id: 'pierce', name: '青冥剑胚 · 剑气贯虹', type: 'attack', archetype: 'xianxia', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '飞剑额外穿透 1 个敌人，且全局伤害 ×1.15。',
     midDesc: '【中阶 · 两仪剑胎】每穿透 1 个目标，后续伤害递增 +15%。',
-    capstoneDesc: '【大成 · 太虚万剑道果】飞剑击穿后折跃追踪下一敌球并递增 +32% 伤害。',
+    capstoneDesc: '【高阶 · 太虚万剑道果】飞剑击穿后折跃追踪下一敌球并递增 +32% 伤害。',
     apply: (p, lv) => {
       p.stats.pierce += 1;
       p.stats.dmgMul *= 1.15;
@@ -320,7 +320,7 @@ const SKILLS = [
     id: 'crit', name: '奥丁之矛 · 必杀神印', type: 'attack', archetype: 'norse', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '暴击率 +9%、暴击倍率 +0.25，全武器与震波同步享暴击收益。',
     midDesc: '【中阶 · 卢恩死印】暴击倍率额外 +0.40。',
-    capstoneDesc: '【大成 · 冈格尼尔贯杀】暴击倍率再 +0.80；暴击处决 <20% 血非首领敌球并引爆 85px 十字斩波。',
+    capstoneDesc: '【高阶 · 冈格尼尔贯杀】暴击倍率再 +0.80；暴击处决 <20% 血非首领敌球并引爆 85px 十字斩波。',
     apply: (p, lv) => {
       p.stats.crit += 0.09;
       p.stats.critMult += 0.25;
@@ -338,7 +338,7 @@ const SKILLS = [
     id: 'split', name: '子母火莲裂变', type: 'attack', archetype: 'xuanhuan', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '击杀炸开碎片弹（+1 碎片），且全局伤害 ×1.15。',
     midDesc: '【中阶 · 高能破片】碎片弹伤害继承提升至 75%。',
-    capstoneDesc: '【大成 · 递归母子火莲】每次命中直接炸出碎片弹，碎片击杀再裂变追踪微弹。',
+    capstoneDesc: '【高阶 · 递归母子火莲】每次命中直接炸出碎片弹，碎片击杀再裂变追踪微弹。',
     apply: (p, lv) => {
       p.stats.split += 1;
       p.stats.dmgMul *= 1.15;
@@ -350,7 +350,7 @@ const SKILLS = [
     id: 'bounce', name: '阿瓦隆星徽 · 折光弹射', type: 'attack', archetype: 'arcane', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '弹丸穿透耗尽后弹向另一敌球（+1 次），且全局伤害 ×1.16。',
     midDesc: '【中阶 · 所罗门六芒核】每次弹射伤害递增 +12%。',
-    capstoneDesc: '【大成 · 大魔导回旋刃】弹射耗尽化为环绕切割 1.2s 的旋转飞刃（暴击 60% 不耗次数）。',
+    capstoneDesc: '【高阶 · 大魔导回旋刃】弹射耗尽化为环绕切割 1.2s 的旋转飞刃（暴击 60% 不耗次数）。',
     apply: (p, lv) => {
       p.stats.bounce += 1;
       p.stats.dmgMul *= 1.16;
@@ -364,7 +364,7 @@ const SKILLS = [
     id: 'orb', name: '太虚护体金丹', type: 'sub', archetype: 'xianxia', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '增加 1 颗护体金丹（金丹伤 +2），且全局伤害 ×1.14。',
     midDesc: '【中阶 · 两仪星环】金丹转速 +25%，球体半径扩大至 11px。',
-    capstoneDesc: '【大成 · 太虚八卦剑阵】额外 +2 金丹且内外环连成持续电离激光束，高速甩出敌球。',
+    capstoneDesc: '【高阶 · 太虚八卦剑阵】额外 +2 金丹且内外环连成持续电离激光束，高速甩出敌球。',
     apply: (p, lv) => {
       p.stats.orbs += 1;
       p.stats.orbDmg += 2;
@@ -380,7 +380,7 @@ const SKILLS = [
     id: 'chain', name: '卢恩雷石 · 妙尔尼尔电弧', type: 'sub', archetype: 'norse', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '释放连锁闪电（跳跃 +1、电弧伤 +3），且全局伤害 ×1.15。',
     midDesc: '【中阶 · 锻铁雷锤核】电弧冷却 -20%，索敌范围 +35%。',
-    capstoneDesc: '【大成 · 诸神黄昏雷网】跳跃 +3，命中节点建立 1.8s 闭合卢恩电网持续电击并麻痹减速 50%。',
+    capstoneDesc: '【高阶 · 诸神黄昏雷网】跳跃 +3，命中节点建立 1.8s 闭合卢恩电网持续电击并麻痹减速 50%。',
     apply: (p, lv) => {
       p.stats.chainLv += 1;
       p.stats.chainJumps += 1;
@@ -397,7 +397,7 @@ const SKILLS = [
     id: 'shock', name: '黑八配重 · 脉冲震爆', type: 'sub', archetype: 'billiard', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '震开周身敌球引爆台球连撞（震波伤 +4、范围 +15），全局伤害 ×1.15。',
     midDesc: '【中阶 · 震荡余波】冲击波触发间隔 -20%。',
-    capstoneDesc: '【大成 · 引力奇点开球】聚拢敌球引爆高频台球群撞，炸开后留下 2 秒强力减速引力残场。',
+    capstoneDesc: '【高阶 · 引力奇点开球】聚拢敌球引爆高频台球群撞，炸开后留下 2 秒强力减速引力残场。',
     apply: (p, lv) => {
       p.stats.shockLv += 1;
       p.stats.shockDmg += 4;
@@ -411,7 +411,7 @@ const SKILLS = [
     id: 'missile', name: '奥术飞弹阵', type: 'sub', archetype: 'arcane', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '发射自动索敌飞弹（+1 枚、基础伤 +2），且全局伤害 ×1.15。',
     midDesc: '【中阶 · 超导推进】飞弹速度 +30%，可额外穿透 1 个敌人。',
-    capstoneDesc: '【大成 · 子母集束蜂群】飞弹命中引爆 65px 溅射后，分裂 2 枚二段蜂群飞弹追击敌球。',
+    capstoneDesc: '【高阶 · 子母集束蜂群】飞弹命中引爆 65px 溅射后，分裂 2 枚二段蜂群飞弹追击敌球。',
     apply: (p, lv) => {
       p.stats.missileLv += 1;
       p.stats.missileDmg += 2;
@@ -462,7 +462,7 @@ const SKILLS = [
   {
     id: 'dash', name: '太虚缩地术', type: 'stat', archetype: 'xianxia', archPts: 1, maxLv: 5,
     desc: () => '主动技能（空格）冷却 -14%。',
-    capstoneDesc: '【大成 · 引力剑影分身】释放空格技能原地留下持续嘲讽聚怪的 2 秒几何残影，结束时剧烈爆炸。',
+    capstoneDesc: '【高阶 · 引力剑影分身】释放空格技能原地留下持续嘲讽聚怪的 2 秒几何残影，结束时剧烈爆炸。',
     apply: (p, lv) => {
       p.stats.dashCd *= 0.86;
       if (lv >= 5) p.stats.capDash = true;
@@ -474,7 +474,7 @@ const SKILLS = [
     id: 'slow', name: '帧率冻结 · 时间压制', type: 'special', archetype: 'exact_zero', archPts: 1, maxLv: 6, midLv: 3,
     desc: () => '所有敌人移速 -8%（上限 55%），全局伤害 ×1.10。',
     midDesc: '【中阶 · 时停增伤】对减速态敌球额外提升 +18% 全局输出。',
-    capstoneDesc: '【大成 · 绝对零度时钟】减速上限升至 55%，全局伤害再 ×1.25。',
+    capstoneDesc: '【高阶 · 绝对零度时钟】减速上限升至 55%，全局伤害再 ×1.25。',
     apply: (p, lv) => {
       p.stats.slow = Math.min(0.55, p.stats.slow + 0.08);
       p.stats.dmgMul *= 1.10;
@@ -492,7 +492,7 @@ const SKILLS = [
     id: 'vamp', name: '英灵殿血祭', type: 'special', archetype: 'norse', archPts: 1, maxLv: 6, midLv: 3,
     desc: () => '每次击杀回复 1.4% 最大生命 + 0.6，全局伤害 ×1.10。',
     midDesc: '【中阶 · 狂战嗜血】暴击伤害倍率额外 +0.35。',
-    capstoneDesc: '【大成 · 英灵不朽】全局伤害再 ×1.30，且生命上限 +20%。',
+    capstoneDesc: '【高阶 · 英灵不朽】全局伤害再 ×1.30，且生命上限 +20%。',
     apply: (p, lv) => {
       p.stats.vamp += 0.6;
       p.stats.vampPct = (p.stats.vampPct || 0) + 0.014;
@@ -534,7 +534,7 @@ const SKILLS = [
     id: 'refract', name: '霍格沃茨回旋咒', type: 'special', archetype: 'arcane', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '弹丸可多次折返（+1 次，保留 85% 伤害），且全局伤害 ×1.14。',
     midDesc: '【中阶 · 星轨校准】折返自动锁定最近敌球追踪，且保留 100% 伤害（零衰减）。',
-    capstoneDesc: '【大成 · 所罗门永动回廊】折返伤害跃升至 135%，且在折返点留下 2.2 秒六芒星折射镜。',
+    capstoneDesc: '【高阶 · 所罗门永动回廊】折返伤害跃升至 135%，且在折返点留下 2.2 秒六芒星折射镜。',
     apply: (p, lv) => {
       p.stats.refract += 1;
       p.stats.dmgMul *= 1.14;
@@ -546,7 +546,7 @@ const SKILLS = [
     id: 'momentum', name: '凌波微步 · 化劲', type: 'special', archetype: 'xianxia', archPts: 1, maxLv: 6, midLv: 3,
     desc: () => '移速 +6%，高于基础移速每 +10% 额外提供 +15% 全局伤害。',
     midDesc: '【中阶 · 剑意化形】移速加成转化为伤害的系数翻倍，且全局伤害 ×1.15。',
-    capstoneDesc: '【大成 · 踏雪无痕】移速再 +12%，全局伤害再 ×1.28。',
+    capstoneDesc: '【高阶 · 踏雪无痕】移速再 +12%，全局伤害再 ×1.28。',
     apply: (p, lv) => {
       p.stats.momentum += 1;
       p.stats.speed *= 1.06;
@@ -566,7 +566,7 @@ const SKILLS = [
     id: 'pinball_master', name: '巨灵神之掌 · 崩撞', type: 'special', archetype: 'billiard', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '击退力度 +45%，敌球【球体对撞】伤害翻倍且击杀必爆双倍经验，全局伤害 ×1.14。',
     midDesc: '【中阶 · 黑八配重核】解锁台球瞄准虚线与撞击预测白圈，碰撞冷却缩短并激活连撞计数。',
-    capstoneDesc: '【大成 · 黄金陀螺撞针】被击飞敌球获四壁全弹性反弹，触发连撞递进金色崩撞。',
+    capstoneDesc: '【高阶 · 黄金陀螺撞针】被击飞敌球获四壁全弹性反弹，触发连撞递进金色崩撞。',
     apply: (p, lv) => {
       p.stats.pinball += 1;
       p.stats.dmgMul *= 1.14;
@@ -578,7 +578,7 @@ const SKILLS = [
     id: 'exact_hunter', name: '天机算尽 · 归零劫', type: 'special', archetype: 'exact_zero', archPts: 2, maxLv: 8, midLv: 4,
     desc: () => '敌球剩余血量低于单发伤害 1.25× 时自动补足触发【精准归零】，全局伤害 ×1.14。',
     midDesc: '【中阶 · 游标卡尺核】精准归零容差提升至 ≥1.35× 单发伤，溢出伤害传导 80% 过载电弧。',
-    capstoneDesc: '【大成 · 天道归零罗盘】精准归零引爆大范围十字解构阵，溢出伤害连锁 3 跳高压电弧。',
+    capstoneDesc: '【高阶 · 天道归零罗盘】精准归零引爆大范围十字解构阵，溢出伤害连锁 3 跳高压电弧。',
     apply: (p, lv) => {
       p.stats.exactHunter += 1;
       p.stats.dmgMul *= 1.14;
