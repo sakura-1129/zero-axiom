@@ -463,11 +463,6 @@ kbd {
   background: rgba(244, 243, 238, 0.72);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
 }
 
 .panel {
@@ -495,26 +490,43 @@ kbd {
 }
 
 .title-panel { max-width: 644px; }
-.notice-panel { max-width: 316px; gap: 11px; }
 .modal-card.small { max-width: 440px; }
+
+.notice-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 25;
+  width: 268px;
+  max-height: 270px;
+  padding: 12px 14px;
+  gap: 8px;
+  overflow-y: auto;
+  box-shadow: 0 10px 28px rgba(17, 19, 21, 0.08);
+}
+
+.notice-panel .swiss-meta {
+  padding-bottom: 6px;
+  font-size: 9px;
+}
 
 .notice-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
 
 .notice-head h2 {
-  font-size: 20px;
-  letter-spacing: 1.5px;
+  font-size: 14px;
+  letter-spacing: 1px;
 }
 
 .notice-badge {
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 1.4px;
-  padding: 2px 7px;
+  letter-spacing: 1px;
+  padding: 1px 5px;
   border-radius: 2px;
   background: var(--red);
   color: #fff;
@@ -523,12 +535,12 @@ kbd {
 .notice-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .notice-item {
-  padding: 10px 11px;
-  border-radius: 4px;
+  padding: 7px 9px;
+  border-radius: 3px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--line-strong);
   background: var(--bg);
@@ -544,17 +556,17 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 6px;
-  font-size: 12px;
+  gap: 4px;
+  margin-bottom: 4px;
+  font-size: 11px;
   color: var(--ink);
 }
 
 .notice-ver span {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 1px;
-  padding: 1px 5px;
+  letter-spacing: 0.8px;
+  padding: 1px 4px;
   border-radius: 2px;
   background: var(--surface-alt);
   color: var(--ink-soft);
@@ -567,12 +579,12 @@ kbd {
 
 .notice-item ul {
   margin: 0;
-  padding-left: 15px;
+  padding-left: 13px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 11.5px;
-  line-height: 1.5;
+  gap: 2px;
+  font-size: 10.5px;
+  line-height: 1.4;
   color: var(--ink-soft);
 }
 
@@ -580,12 +592,12 @@ kbd {
   color: var(--ink);
 }
 
-@media (max-width: 1020px) {
-  #screenTitle {
-    align-items: flex-start;
-  }
+@media (max-width: 1180px) {
   .notice-panel {
+    position: static;
+    width: 100%;
     max-width: 644px;
+    max-height: 170px;
   }
 }
 
