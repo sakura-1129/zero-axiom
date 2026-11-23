@@ -2696,7 +2696,9 @@ function hurtPlayer(e) {
     return;
   }
 
-  const dmg = Math.max(1, Math.round(e.dmg * (1 - p.stats.armor)));
+  const rawDmg = Math.max(1, Math.round(e.dmg * (1 - p.stats.armor)));
+  const hitCap = Math.max(1, Math.floor(p.maxHp * 0.35));
+  const dmg = Math.min(rawDmg, hitCap);
   p.hp -= dmg;
   p.iframe = CFG.player.iframe;
   Game.flash = 0.9;
@@ -2710,8 +2712,8 @@ function hurtPlayer(e) {
     const dx = o.x - p.x;
     const dy = o.y - p.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    if (d < 130) {
-      const kb = effectiveKb(240);
+    if (d < 165) {
+      const kb = effectiveKb(300);
       o.kx += (dx / d) * kb;
       o.ky += (dy / d) * kb;
     }
@@ -2754,7 +2756,9 @@ function updateEBullets(dt) {
         if (p.shieldActive) {
           triggerAntimatterBreak(p);
         } else {
-          const dmg = Math.max(1, Math.round(b.dmg * (1 - p.stats.armor)));
+          const rawDmg = Math.max(1, Math.round(b.dmg * (1 - p.stats.armor)));
+          const hitCap = Math.max(1, Math.floor(p.maxHp * 0.35));
+          const dmg = Math.min(rawDmg, hitCap);
           p.hp -= dmg;
           p.iframe = CFG.player.iframe;
           Game.flash = 0.8;

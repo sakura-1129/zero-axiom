@@ -24,7 +24,7 @@ const CFG = {
     dashCd: 2.5,
     dashTime: 0.16,
     dashMul: 3.3,
-    iframe: 0.40,
+    iframe: 0.55,
   },
 
   /* 敌人基础值 —— 具备压迫感的几何敌潮，随时间指数膨胀 */
@@ -42,9 +42,9 @@ const CFG = {
 
 /* 三阶段首领预设 */
 const BOSS_CONFIGS = [
-  { tier: 1, time: 110, label: '秩序核心 · 壹型',   r: 52, hpMul: 1.25, speed: 68, dmg: 9 },
-  { tier: 2, time: 220, label: '矩阵切割者 · 贰型', r: 56, hpMul: 2.20, speed: 74, dmg: 12 },
-  { tier: 3, time: 330, label: '奇点主宰 · 终型',   r: 62, hpMul: 3.10, speed: 80, dmg: 15 },
+  { tier: 1, time: 110, label: '秩序核心 · 壹型',   r: 52, hpMul: 2.40, speed: 68, dmg: 9 },
+  { tier: 2, time: 220, label: '矩阵切割者 · 贰型', r: 56, hpMul: 4.50, speed: 74, dmg: 12 },
+  { tier: 3, time: 330, label: '奇点主宰 · 终型',   r: 62, hpMul: 6.80, speed: 80, dmg: 15 },
 ];
 
 /* ══════════════ 技能类型 ══════════════ */
@@ -756,10 +756,10 @@ function hpScaleAt(t, diffId) {
   return (1 + (t / 46) * (1 + t / 64)) * Math.pow(1.0148, t) * d.hpMul;
 }
 
-/** 敌人攻击力倍率 —— 随时间陡峭攀升 */
+/** 敌人攻击力倍率 —— 平缓递进，避免后期数值爆炸秒杀玩家 */
 function dmgScaleAt(t, diffId) {
   const d = getDifficulty(diffId);
-  return (1 + (t / 80) * (1 + t / 120)) * Math.pow(1.0080, t) * d.dmgMul;
+  return (1 + (t / 110) * (1 + t / 150)) * Math.pow(1.0048, t) * d.dmgMul;
 }
 
 /** 每秒刷怪数 —— 从 1.35/s 起步，平稳攀升至 10.0/s（随难度倍率缩放） */
