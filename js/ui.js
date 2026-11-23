@@ -4,15 +4,18 @@ const UI = {
   el: {},
   _hudT: 0,
   _dockSig: '',
+  _codexTab: 'combos',
 
   init() {
     const ids = [
       'hud', 'hpFill', 'hpLabel', 'xpFill', 'xpLabel', 'lvLabel', 'tierBadge', 'clock', 'threat',
-      'kills', 'dps', 'btnMute', 'btnPauseHud', 'bossbar', 'bossFill', 'bossName', 'dock', 'dashbox', 'dashArc', 'dashLabel', 'dashCharges', 'tip',
-      'screenTitle', 'brandBall', 'orbGrid', 'orbSummary', 'diffGrid', 'diffSummary', 'btnStart', 'btnEndlessToggle', 'record',
+      'kills', 'dps', 'btnCodexHud', 'btnMute', 'btnPauseHud', 'bossbar', 'bossFill', 'bossName', 'dock', 'dashbox', 'dashArc', 'dashLabel', 'dashCharges', 'tip',
+      'screenTitle', 'brandBall', 'orbGrid', 'orbSummary', 'diffGrid', 'diffSummary', 'btnStart', 'btnEndlessToggle', 'btnCodexTitle', 'btnHistory', 'record',
       'screenLevel', 'lvHead', 'lvTitle', 'lvSub', 'lvNum', 'cards',
-      'screenPause', 'pauseStats', 'btnResume', 'btnQuit',
-      'screenOver', 'overTitle', 'overSub', 'overStats', 'overBuild', 'btnContinueEndless', 'btnAgain', 'btnTitle',
+      'screenPause', 'pauseStats', 'btnResume', 'btnCodexPause', 'btnQuit',
+      'screenCodex', 'codexSub', 'codexTabs', 'codexBody', 'btnCodexClose',
+      'screenOver', 'overTitle', 'overSub', 'overStats', 'overAnalysis', 'overBuild', 'btnContinueEndless', 'btnAgain', 'btnTitle',
+      'screenHistory', 'historyCareer', 'historyTrend', 'historyList', 'btnClearHistory', 'btnCloseHistory',
     ];
     for (const id of ids) this.el[id] = document.getElementById(id);
 
@@ -39,6 +42,22 @@ const UI = {
     this.el.btnResume.onclick = () => Game.resume();
     this.el.btnQuit.onclick = () => Game.toTitle();
     if (this.el.btnPauseHud) this.el.btnPauseHud.onclick = () => Game.togglePause();
+    if (this.el.btnCodexTitle) this.el.btnCodexTitle.onclick = () => { Sfx.init(); Game.openCodex(); };
+    if (this.el.btnCodexHud) this.el.btnCodexHud.onclick = () => { Sfx.init(); Game.openCodex(); };
+    if (this.el.btnCodexPause) this.el.btnCodexPause.onclick = () => { Sfx.init(); Game.openCodex(); };
+    if (this.el.btnCodexClose) this.el.btnCodexClose.onclick = () => Game.closeCodex();
+    if (this.el.screenCodex) {
+      this.el.screenCodex.addEventListener('click', ev => {
+        if (ev.target === this.el.screenCodex) Game.closeCodex();
+      });
+    }
+    if (this.el.codexTabs) {
+      this.el.codexTabs.addEventListener('click', ev => {
+        const btn = ev.target.closest('.codex-tab');
+        if (!btn) return;
+        this.setCodexTab(btn.dataset.tab);
+      });
+    }
     if (this.el.btnMute) {
       this.el.btnMute.onclick = () => {
         Sfx.init();
@@ -160,8 +179,195 @@ const UI = {
     this.el.screenTitle.classList.add('hidden');
     this.el.screenLevel.classList.add('hidden');
     this.el.screenPause.classList.add('hidden');
+    if (this.el.screenCodex) this.el.screenCodex.classList.add('hidden');
     this.el.screenOver.classList.add('hidden');
     if (this.el.screenHistory) this.el.screenHistory.classList.add('hidden');
+  },
+
+  showCodex(tab) {
+    if (!this.el.screenCodex) return;
+    if (this.el.screenPause) this.el.screenPause.classList.add('hidden');
+    if (tab) this._codexTab = tab;
+    this.syncCodexTabs();
+    this.renderCodex();
+    this.el.screenCodex.classList.remove('hidden');
+  },
+
+  hideCodex() {
+    if (this.el.screenCodex) this.el.screenCodex.classList.add('hidden');
+  },
+
+  setCodexTab(tab) {
+    if (tab !== 'combos' && tab !== 'archs') return;
+    this._codexTab = tab;
+    this.syncCodexTabs();
+    this.renderCodex();
+  },
+
+  syncCodexTabs() {
+    if (!this.el.codexTabs || !this.el.codexTabs.querySelectorAll) return;
+    const btns = this.el.codexTabs.querySelectorAll('.codex-tab');
+    for (const btn of btns) {
+      const on = btn.dataset.tab === this._codexTab;
+      btn.classList.toggle('active', on);
+      if (btn.setAttribute) btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    }
+  },
+
+  renderCodex() {
+    if (!this.el.codexBody) return;
+    const th = typeof getArchThresholds === 'function' ? getArchThresholds() : { stage1: 1, stage2: 10, stage3: 20, capLocked: 19 };
+    const p = (typeof Game !== 'undefined' && Game.player) ? Game.player : null;
+    const hist = (typeof Game !== 'undefined' && Game.codexHistory) ? Game.codexHistory : { combos: {}, archs: {} };
+    const list = (typeof COMBOS !== 'undefined' && Array.isArray(COMBOS)) ? COMBOS : [];
+
+    if (this.el.codexSub) {
+      if (p && p.superposition) {
+        this.el.codexSub.textContent = '当前已激活 Ⅳ阶叠加态：【' + p.superposition.name + '】';
+      } else if (p && p.maxedArchs && p.maxedArchs.length === 1 && typeof getArchMeta === 'function') {
+        const m = getArchMeta(p.maxedArchs[0]);
+        this.el.codexSub.textContent = '当前已达成 Ⅲ阶【' + m.short + '】，再将 1 条流派升至 20pt 即可融合 Ⅳ阶叠加态';
+      } else {
+        this.el.codexSub.textContent = '任意 2 条流派达到 Ⅲ阶（' + th.stage3 + 'pt）即可融合 Ⅳ阶双极叠加态';
+      }
+    }
+
+    if (this._codexTab === 'combos') {
+      const ruleHtml = '<div class="codex-rule">' +
+        '<b>合成规则</b>：同一局内任意 2 条流派均达到 Ⅲ阶（' + th.stage3 + 'pt）自动融合为 <b>Ⅳ阶双极叠加态</b>；' +
+        '每局最多锁定 2 条终极流派，其余流派上限封顶 ' + th.capLocked + 'pt。核心技能 +2pt · 辅助技能 +1pt · Boss遗物 +3pt。' +
+      '</div>';
+
+      const cardsHtml = list.map(c => {
+        const colA = palCol(c.a.col);
+        const colB = palCol(c.b.col);
+        const mA = typeof getArchMeta === 'function' ? getArchMeta(c.a.type) : { short: c.a.name };
+        const mB = typeof getArchMeta === 'function' ? getArchMeta(c.b.type) : { short: c.b.name };
+        const stA = p && p.archStages ? (p.archStages[c.a.type] || 0) : 0;
+        const stB = p && p.archStages ? (p.archStages[c.b.type] || 0) : 0;
+        const ptsA = p && p.archetypes ? (p.archetypes[c.a.type] || 0) : 0;
+        const ptsB = p && p.archetypes ? (p.archetypes[c.b.type] || 0) : 0;
+        const active = !!(p && p.superposition && p.superposition.id === c.id);
+        const locked = !!(p && p.maxedArchs && p.maxedArchs.length >= 2 && !active);
+        const discovered = !!(hist.combos && hist.combos[c.id]);
+
+        let statusTxt = discovered ? '历史已达成' : '配方可用';
+        let statusCls = discovered ? 'done' : '';
+        if (active) {
+          statusTxt = '本局已激活 ✦';
+          statusCls = 'active';
+        } else if (p) {
+          if (locked) {
+            statusTxt = '本局槽位已满';
+            statusCls = 'locked';
+          } else if (stA >= 3 || stB >= 3) {
+            const needArch = stA >= 3 ? mB.short : mA.short;
+            const needPts = Math.max(0, th.stage3 - (stA >= 3 ? ptsB : ptsA));
+            statusTxt = needArch + ' 差 ' + needPts + 'pt';
+            statusCls = 'ready';
+          } else {
+            statusTxt = mA.short + ' ' + ptsA + '/' + th.stage3 + ' · ' + mB.short + ' ' + ptsB + '/' + th.stage3;
+          }
+        }
+
+        const iconA = Object.keys(SKILL_MAP).find(k => SKILL_MAP[k].archetype === c.a.type && (SKILL_MAP[k].archPts || 1) >= 2) || 'dmg';
+        const iconB = Object.keys(SKILL_MAP).find(k => SKILL_MAP[k].archetype === c.b.type && (SKILL_MAP[k].archPts || 1) >= 2) || 'dmg';
+        const resolved = typeof resolveAceCombo === 'function' ? resolveAceCombo(c.a.type, c.b.type) : null;
+        const fullDesc = (resolved && resolved.desc) ? resolved.desc : c.sub;
+
+        return '' +
+          '<article class="combo-card' + (active ? ' is-active' : '') + (locked ? ' is-locked' : '') + '" style="--ca:' + colA + ';--cb:' + colB + '">' +
+            '<div class="combo-top">' +
+              '<span class="combo-code">' + c.code + '</span>' +
+              '<span class="combo-status ' + statusCls + '">' + statusTxt + '</span>' +
+            '</div>' +
+            '<div class="combo-formula">' +
+              '<span class="combo-part" style="--pcol:' + colA + '">' + skillIcon(iconA, 14) + '<b>' + mA.short + ' · ' + c.a.name + '</b></span>' +
+              '<span class="combo-op">×</span>' +
+              '<span class="combo-part" style="--pcol:' + colB + '">' + skillIcon(iconB, 14) + '<b>' + mB.short + ' · ' + c.b.name + '</b></span>' +
+            '</div>' +
+            '<div class="combo-name">' + c.name + '</div>' +
+            '<div class="combo-desc">' + fullDesc + '</div>' +
+          '</article>';
+      }).join('');
+
+      const fallbackHtml = '<div class="codex-fallback">' +
+        '<b>通用双极共鸣（任意其余双 Ⅲ阶组合）</b>：若两门 Ⅲ阶流派不在上述 6 组专属配方内，将触发【双极共鸣】，双形态同步释放且所有伤害 <b>+35%</b>。' +
+      '</div>';
+
+      this.el.codexBody.innerHTML = ruleHtml + '<div class="combo-grid">' + cardsHtml + '</div>' + fallbackHtml;
+      return;
+    }
+
+    // Tab 2: 六大流派 · 进化与所属模组
+    const archList = typeof ARCHETYPE_ORDER !== 'undefined' ? ARCHETYPE_ORDER : Object.keys(ARCHETYPES || {});
+    const archHtml = archList.map(aid => {
+      const m = ARCHETYPES[aid];
+      if (!m) return '';
+      const col = palCol(m.color);
+      const curPts = p && p.archetypes ? (p.archetypes[aid] || 0) : 0;
+      const curSt = p && p.archStages ? (p.archStages[aid] || 0) : 0;
+      const discovered = !!(hist.archs && hist.archs[aid]);
+      const stLabel = curSt > 0 ? (stageRoman(curSt) + '阶 · ' + curPts + 'pt') : (p ? (curPts + 'pt · 未激活') : (discovered ? '历史已觉醒' : '1 / 10 / 20 pt'));
+
+      const stagesHtml = (m.stages || []).map(st => {
+        const reached = curSt >= st.stage;
+        const req = st.stage === 1 ? th.stage1 : (st.stage === 2 ? th.stage2 : th.stage3);
+        return '<div class="arch-stage' + (reached ? ' reached' : '') + '">' +
+          '<div class="arch-stage-head"><b>' + st.roman + '阶 · ' + st.name + '</b><span>' + req + 'pt</span></div>' +
+          '<p>' + st.desc + '</p>' +
+        '</div>';
+      }).join('');
+
+      const partners = (typeof getComboPartners === 'function' ? getComboPartners(aid) : [])
+        .map(pid => {
+          const pm = ARCHETYPES[pid];
+          const combo = typeof getCombo === 'function' ? getCombo(aid, pid) : null;
+          if (!pm || !combo) return '';
+          return '<span class="arch-partner" style="--pcol:' + palCol(pm.color) + '">' + pm.short + ' → <b>' + combo.name + '</b></span>';
+        }).join('');
+
+      const archSkills = (typeof SKILLS !== 'undefined' ? SKILLS : [])
+        .filter(s => s.archetype === aid)
+        .sort((a, b) => (b.archPts || 1) - (a.archPts || 1));
+      const skillsHtml = archSkills.map(s => {
+        const lv = (typeof Game !== 'undefined' && Game.owned && Game.owned[s.id]) ? Game.owned[s.id] : 0;
+        const pts = s.archPts || 1;
+        return '<span class="arch-mod' + (pts >= 2 ? ' core' : '') + (lv > 0 ? ' owned' : '') + '">' +
+          skillIcon(s.id, 13) +
+          '<span>' + s.name + '</span>' +
+          '<b>+' + pts + 'pt' + (lv > 0 ? ' · Lv.' + lv : '') + '</b>' +
+        '</span>';
+      }).join('');
+
+      const archRelics = (typeof RELICS !== 'undefined' ? RELICS : [])
+        .filter(r => Array.isArray(r.archetypes) && r.archetypes.indexOf(aid) >= 0);
+      const relicsHtml = archRelics.map(r => {
+        const owned = !!(typeof Game !== 'undefined' && Game.ownedRelics && Game.ownedRelics[r.id]);
+        return '<span class="arch-mod relic' + (owned ? ' owned' : '') + '">' +
+          skillIcon(r.id, 13) +
+          '<span>' + r.name + '</span>' +
+          '<b>+' + (r.catalystPts || 3) + 'pt</b>' +
+        '</span>';
+      }).join('');
+
+      return '' +
+        '<section class="arch-card" style="--arch:' + col + '">' +
+          '<div class="arch-head">' +
+            '<div class="arch-title-wrap">' +
+              '<span class="arch-code">' + m.code + '</span>' +
+              '<h3>' + m.label + '</h3>' +
+              '<span class="arch-core">' + m.coreName + '</span>' +
+            '</div>' +
+            '<span class="arch-stat' + (curSt >= 3 ? ' maxed' : '') + '">' + stLabel + '</span>' +
+          '</div>' +
+          '<div class="arch-stages">' + stagesHtml + '</div>' +
+          (partners ? '<div class="arch-partners"><span class="arch-sec-label">专属融合</span>' + partners + '</div>' : '') +
+          '<div class="arch-mods"><span class="arch-sec-label">所属模组与遗物</span><div class="arch-mod-list">' + skillsHtml + relicsHtml + '</div></div>' +
+        '</section>';
+    }).join('');
+
+    this.el.codexBody.innerHTML = '<div class="arch-grid">' + archHtml + '</div>';
   },
 
   showTitle(best) {
@@ -409,10 +615,99 @@ const UI = {
     ]);
 
     this.el.overBuild.innerHTML = this.buildChipsHTML();
+    if (this.el.overAnalysis && typeof Analytics !== 'undefined') {
+      const summary = Game.lastRunSummary || Analytics.buildRunSummary(win);
+      const analysis = Analytics.computeStyle(summary);
+      const history = Analytics.loadHistory();
+      const career = history.length > 1 ? Analytics.aggregateCareer(history) : null;
+      const radar = Analytics.renderRadarSVG(analysis.scores, analysis.color, career ? career.scores : null);
+      const barSegs = analysis.breakdown.filter(b => b.pct > 0).map(b =>
+        '<span class="bd-seg" style="width:' + b.pct + '%;background:' + b.color + '" title="' + b.label + ' ' + b.pct + '%"></span>'
+      ).join('');
+      const legend = analysis.breakdown.map(b =>
+        '<span class="bd-item"><i style="background:' + b.color + '"></i>' + b.label + ' <b>' + b.pct + '%</b></span>'
+      ).join('');
+      this.el.overAnalysis.innerHTML =
+        '<div class="analysis-grid">' +
+          '<div class="analysis-meta">' +
+            '<div class="analysis-tag" style="color:' + analysis.color + '">STYLE · ' + analysis.title + '</div>' +
+            '<div class="analysis-comment">' + analysis.comment + '</div>' +
+            '<div class="analysis-metrics">' +
+              '<span>峰值秒伤 <b>' + fmt(summary.peakDps) + '</b></span>' +
+              '<span>最高暴击 <b>' + fmt(summary.maxCritDmg) + '</b></span>' +
+              '<span>对撞 <b>' + summary.billiardHits + '</b> · 归零 <b>' + summary.exactZeroCount + '</b></span>' +
+            '</div>' +
+            '<div class="bd-bar">' + barSegs + '</div>' +
+            '<div class="bd-legend">' + legend + '</div>' +
+          '</div>' +
+          '<div class="analysis-radar">' + radar + (career ? '<div class="radar-note">实线本局 · 虚线生涯均值</div>' : '') + '</div>' +
+        '</div>';
+    }
     if (this.el.btnContinueEndless) {
       this.el.btnContinueEndless.classList.toggle('hidden', !(win && !Game.endless));
     }
     this.el.screenOver.classList.remove('hidden');
+  },
+
+  showHistory() {
+    if (!this.el.screenHistory || typeof Analytics === 'undefined') return;
+    const history = Analytics.loadHistory();
+    const career = Analytics.aggregateCareer(history);
+    const favOrb = career.favoriteOrb && typeof ORBS !== 'undefined' && ORBS[career.favoriteOrb] ? ORBS[career.favoriteOrb].name : '—';
+
+    if (this.el.historyCareer) {
+      this.el.historyCareer.innerHTML =
+        '<div class="analysis-grid">' +
+          '<div class="analysis-meta">' +
+            '<div class="analysis-tag" style="color:#0055FF">CAREER · ' + career.title + '</div>' +
+            '<div class="analysis-comment">' + career.comment + '</div>' +
+            '<div class="stats history-kpis">' + this.statHTML([
+              ['总场次 / 胜率', career.runs + ' 局 · ' + career.winRate + '%'],
+              ['最高峰值秒伤', fmt(career.bestDps)],
+              ['累计击杀', fmt(career.totalKills)],
+              ['本命球体', favOrb],
+            ]) + '</div>' +
+          '</div>' +
+          '<div class="analysis-radar">' + Analytics.renderRadarSVG(career.scores, '#0055FF') + '</div>' +
+        '</div>';
+    }
+
+    if (this.el.historyTrend) {
+      this.el.historyTrend.innerHTML = Analytics.renderTrendSVG(history);
+    }
+
+    if (this.el.historyList) {
+      if (history.length === 0) {
+        this.el.historyList.innerHTML = '<div class="history-empty">暂无战绩记录，完成一局游戏后将自动生成档案。</div>';
+      } else {
+        this.el.historyList.innerHTML = history.map((r, idx) => {
+          const orbName = (typeof ORBS !== 'undefined' && ORBS[r.orbId]) ? ORBS[r.orbId].name : r.orbId;
+          const diffName = (typeof DIFFICULTIES !== 'undefined' && DIFFICULTIES[r.difficulty]) ? DIFFICULTIES[r.difficulty].name : r.difficulty;
+          const chips = Object.keys(r.owned || {}).slice(0, 6).map(id => {
+            const sk = typeof SKILL_MAP !== 'undefined' ? SKILL_MAP[id] : null;
+            return sk ? '<span class="h-chip">' + sk.name + ' Lv.' + r.owned[id] + '</span>' : '';
+          }).join('');
+          return '<div class="history-row" data-hidx="' + idx + '">' +
+            '<div class="h-top">' +
+              '<span class="h-res ' + (r.win ? 'win' : 'loss') + '">' + (r.win ? '突围' : '解体') + '</span>' +
+              '<b>' + orbName + ' · ' + diffName + '</b>' +
+              '<span class="h-style">' + (r.title || '均衡探索者') + '</span>' +
+              '<span class="h-time">' + fmtTime(r.time || 0) + ' · Lv.' + (r.level || 1) + ' · ' + fmt(r.peakDps || 0) + ' DPS</span>' +
+            '</div>' +
+            '<div class="h-detail">' +
+              '<span>击杀 ' + (r.kills || 0) + ' · 对撞 ' + (r.billiardHits || 0) + ' · 归零 ' + (r.exactZeroCount || 0) + ' · 信标 ' + (r.beaconsCaptured || 0) + '</span>' +
+              (chips ? '<div class="h-chips">' + chips + '</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+
+    this.el.screenHistory.classList.remove('hidden');
+  },
+
+  hideHistory() {
+    if (this.el.screenHistory) this.el.screenHistory.classList.add('hidden');
   },
 
   statHTML(pairs) {

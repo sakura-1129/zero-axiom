@@ -114,6 +114,7 @@
         <button class="btn" id="btnStart">开始游戏</button>
         <button type="button" class="btn ghost endless-toggle" id="btnEndlessToggle" aria-pressed="false">∞ 无尽模式：关</button>
         <button type="button" class="btn ghost" id="btnCodexTitle">合成图鉴</button>
+        <button type="button" class="btn ghost" id="btnHistory">战绩档案</button>
       </div>
       <div class="record" id="record">最佳存活 00:00 · 最高击杀 0</div>
     </div>
@@ -253,6 +254,7 @@
     <h2 id="overTitle">核心解体</h2>
     <p class="over-sub" id="overSub">你被数值洪流吞没了</p>
     <div class="stats" id="overStats"></div>
+    <div class="over-analysis" id="overAnalysis"></div>
     <div class="build" id="overBuild"></div>
     <div class="btn-row">
       <button class="btn hidden" id="btnContinueEndless">∞ 继续无尽</button>
@@ -262,10 +264,33 @@
   </div>
 </div>
 
+<!-- ══════════ 战绩档案与风格分析 ══════════ -->
+<div class="screen frosted hidden" id="screenHistory">
+  <div class="panel modal-card history-panel">
+    <div class="swiss-meta">
+      <span>PLAYER DOSSIER</span>
+      <span>PLAYSTYLE ANALYTICS</span>
+    </div>
+    <h2>战绩档案与风格分析</h2>
+    <div id="historyCareer"></div>
+    <div class="history-trend-wrap">
+      <div class="history-subhead">RECENT 10 RUNS · 近期存活曲线</div>
+      <div id="historyTrend"></div>
+    </div>
+    <div class="history-subhead">RUN LOG · 近期战报</div>
+    <div class="history-list" id="historyList"></div>
+    <div class="btn-row">
+      <button type="button" class="btn" id="btnCloseHistory">返回</button>
+      <button type="button" class="btn ghost" id="btnClearHistory">清空档案</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/utils.js"></script>
 <script src="js/config.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/render.js"></script>
+<script src="js/analytics.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
 </body>

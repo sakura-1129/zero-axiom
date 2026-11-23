@@ -50,6 +50,12 @@ function createGameContext() {
     }),
   };
 
+  const memStore = new Map();
+  const mockStorage = {
+    getItem: (k) => (memStore.has(k) ? memStore.get(k) : null),
+    setItem: (k, v) => { memStore.set(k, String(v)); },
+    removeItem: (k) => { memStore.delete(k); },
+  };
   const sandbox = {
     Math,
     console,
@@ -61,6 +67,7 @@ function createGameContext() {
     String,
     Number,
     Boolean,
+    Date,
     parseInt,
     isFinite,
     setTimeout,
@@ -70,7 +77,7 @@ function createGameContext() {
       devicePixelRatio: 1,
       addEventListener: () => {},
       requestAnimationFrame: () => 1,
-      localStorage: { getItem: () => null, setItem: () => {} },
+      localStorage: mockStorage,
       AudioContext: function () {
         return {
           createGain: () => ({ gain: { value: 0 }, connect: () => {} }),
@@ -83,7 +90,7 @@ function createGameContext() {
       createElement: () => dummyCanvas,
       addEventListener: () => {},
     },
-    localStorage: { getItem: () => null, setItem: () => {} },
+    localStorage: mockStorage,
     requestAnimationFrame: () => 1,
   };
   sandbox.globalThis = sandbox;
@@ -91,7 +98,7 @@ function createGameContext() {
 
   const ctx = vm.createContext(sandbox);
 
-  ['js/utils.js', 'js/config.js', 'js/audio.js', 'js/render.js', 'js/ui.js'].forEach((f) => {
+  ['js/utils.js', 'js/config.js', 'js/audio.js', 'js/render.js', 'js/analytics.js', 'js/ui.js'].forEach((f) => {
     vm.runInContext(fs.readFileSync(path.join(repoRoot, f), 'utf8'), ctx);
   });
 
@@ -113,6 +120,7 @@ function createGameContext() {
       globalThis.updateFx = updateFx;
       globalThis.drawWorld = drawWorld;
       globalThis.Render = Render;
+      globalThis.Analytics = Analytics;
       globalThis.CFG = CFG;
       globalThis.ORBS = ORBS;
       globalThis.RELICS = RELICS;
@@ -892,6 +900,57 @@ test('16. 4-Stage Evolution (I->II->III->IV), Archetype Mapping, and MAX_ULTIMAT
   assert.ok(p.archStages.norse <= 2, `3rd path stage capped <= 2, got ${p.archStages.norse}`);
   assert.strictEqual(p.maxedArchs.length, ctx.MAX_ULTIMATES, 'maxedArchs strictly capped at MAX_ULTIMATES = 2');
   assert.strictEqual(p.superposition.id, 'xian_xuan', 'Existing Stage IV superposition remains locked');
+});
+
+test('17. Playstyle Analytics: Telemetry tracking, 5D Radar, Titles, and History Persistence', () => {
+  const ctx = createGameContext();
+  ctx.Game.start();
+
+  // 1) Zero-time edge case produces finite clamped scores
+  const zeroAnalysis = ctx.Analytics.computeStyle({ time: 0, dmgDealt: 0 });
+  for (const k of ['aggression', 'mobility', 'control', 'axiom', 'resilience']) {
+    const v = zeroAnalysis.scores[k];
+    assert.ok(Number.isFinite(v) && v >= 0 && v <= 100, `Score ${k} must be finite [0,100], got ${v}`);
+  }
+
+  // 2) Live telemetry hooks record primary, billiard, exact zero, and skill casts
+  const e1 = ctx.spawnEnemyRaw('tank', 100, 100, 1);
+  e1.hp = 100;
+  ctx.damageEnemy(e1, 20, true, { primary: true, x: 80, y: 100 });
+  ctx.damageEnemy(e1, 15, false, { isBilliard: true, x: 90, y: 100 });
+  ctx.triggerOrbSkill();
+  assert.strictEqual(ctx.Game.telemetry.dmgPrimary, 20);
+  assert.strictEqual(ctx.Game.telemetry.dmgBilliard, 15);
+  assert.strictEqual(ctx.Game.telemetry.billiardHits, 1);
+  assert.strictEqual(ctx.Game.telemetry.maxCritDmg, 20);
+  assert.strictEqual(ctx.Game.telemetry.skillCasts, 1);
+
+  // 3) Style classification identifies Billiard & Exact Zero specialists
+  const billiardStyle = ctx.Analytics.computeStyle({
+    time: 120, dmgDealt: 1000, dmgPrimary: 600, dmgBilliard: 300, billiardHits: 60,
+  });
+  assert.strictEqual(billiardStyle.title, '台球物理学家');
+
+  const ezStyle = ctx.Analytics.computeStyle({
+    time: 120, dmgDealt: 1000, dmgPrimary: 700, dmgExactZero: 200, dmgOverkill: 100, exactZeroCount: 35,
+  });
+  assert.strictEqual(ezStyle.title, '数字处刑官');
+
+  // 4) History persistence caps at 25 runs and generates career radar & trend SVG
+  ctx.Analytics.clearHistory();
+  for (let i = 0; i < 28; i++) {
+    ctx.Analytics.saveRun({
+      win: i % 2 === 0, orbId: 'cobalt', difficulty: 'normal',
+      time: 60 + i * 5, level: 5 + i, kills: 100 + i, dmgDealt: 5000, peakDps: 200 + i,
+      dmgPrimary: 4000, dmgSub: 1000, dmgBilliard: 0, dmgExactZero: 0, dmgOverkill: 0,
+    });
+  }
+  const hist = ctx.Analytics.loadHistory();
+  assert.strictEqual(hist.length, 25, 'History storage caps at 25 runs');
+  const career = ctx.Analytics.aggregateCareer(hist);
+  assert.strictEqual(career.runs, 25);
+  assert.ok(ctx.Analytics.renderRadarSVG(career.scores, '#0055FF').includes('<polygon'));
+  assert.ok(ctx.Analytics.renderTrendSVG(hist).includes('<path'));
 });
 
 
