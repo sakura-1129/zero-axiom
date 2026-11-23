@@ -513,7 +513,7 @@ test('10. Playable Orbs: Cobalt Overclock Dash, Crimson Scaled Pulse, and Amber 
   ctx.Game.setOrb('cobalt');
   ctx.Game.start();
   assert.strictEqual(ctx.Game.player.orbId, 'cobalt');
-  assert.strictEqual(ctx.Game.player.maxHp, 30);
+  assert.strictEqual(ctx.Game.player.maxHp, 60);
   assert.strictEqual(ctx.Game.player.stats.dmg, 1);
   assert.ok(ctx.Game.player.stats.fireInterval >= 0.55, 'Opening fireInterval is balanced (>= 0.55s)');
   ctx.Game.bullets.length = 0;
@@ -532,7 +532,7 @@ test('10. Playable Orbs: Cobalt Overclock Dash, Crimson Scaled Pulse, and Amber 
   ctx.Game.setOrb('crimson');
   ctx.Game.start();
   assert.strictEqual(ctx.Game.player.orbId, 'crimson');
-  assert.strictEqual(ctx.Game.player.maxHp, 38);
+  assert.strictEqual(ctx.Game.player.maxHp, 76);
   assert.strictEqual(ctx.Game.player.stats.dmg, 2, 'Crimson starts with 1 + 1 = 2 dmg');
   assert.ok(ctx.Game.player.stats.fireInterval >= 0.65, 'Crimson heavy reload >= 0.65s');
   ctx.Game.player.stats.crit = 0;
@@ -553,7 +553,7 @@ test('10. Playable Orbs: Cobalt Overclock Dash, Crimson Scaled Pulse, and Amber 
   ctx.Game.setOrb('amber');
   ctx.Game.start();
   assert.strictEqual(ctx.Game.player.orbId, 'amber');
-  assert.strictEqual(ctx.Game.player.maxHp, 30);
+  assert.strictEqual(ctx.Game.player.maxHp, 60);
   assert.ok(ctx.Game.player.stats.crit > ctx.CFG.player.crit, 'Amber orb has bonus crit');
   ctx.Game.player.stats.crit = 0;
   ctx.Game.bullets.length = 0;

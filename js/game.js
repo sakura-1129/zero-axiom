@@ -483,6 +483,8 @@ function resetRun() {
       capSlow: false,
       midVamp: false,
       capVamp: false,
+      midHp: false,
+      capHp: false,
       orbs: 0, orbDmg: 1, orbPhase: 0,
       chainLv: 0, chainT: 2.2, chainDmg: 1.5, chainJumps: 0,
       shockLv: 0, shockT: 2.4, shockDmg: 2.5, shockR: 88,
@@ -838,6 +840,9 @@ function calcPlayerEffectiveDmg(p, baseOverride) {
     const curSp = s.speed * currentSpeedMul();
     const bonusRatio = Math.max(0, curSp / CFG.player.speed - 1);
     mul *= 1 + (bonusRatio / 0.1) * 0.12 * s.momentum;
+  }
+  if (s.capHp && p.hp >= p.maxHp * 0.6) {
+    mul *= 1 + Math.min(1.5, p.maxHp * 0.0025);
   }
   const base = baseOverride !== undefined ? baseOverride : s.dmg;
   return Math.max(0.5, base * mul);
@@ -2738,7 +2743,7 @@ function hurtPlayer(e) {
   }
 
   const rawDmg = Math.max(1, Math.round(e.dmg * (1 - p.stats.armor)));
-  const hitCap = Math.max(1, Math.floor(p.maxHp * 0.35));
+  const hitCap = Math.max(1, Math.floor(p.maxHp * 0.28));
   const dmg = Math.min(rawDmg, hitCap);
   p.hp -= dmg;
   p.iframe = CFG.player.iframe;
@@ -2798,7 +2803,7 @@ function updateEBullets(dt) {
           triggerAntimatterBreak(p);
         } else {
           const rawDmg = Math.max(1, Math.round(b.dmg * (1 - p.stats.armor)));
-          const hitCap = Math.max(1, Math.floor(p.maxHp * 0.35));
+          const hitCap = Math.max(1, Math.floor(p.maxHp * 0.28));
           const dmg = Math.min(rawDmg, hitCap);
           p.hp -= dmg;
           p.iframe = CFG.player.iframe;
@@ -3432,6 +3437,11 @@ function gainXp(v) {
     Game.xp -= Game.xpNeed;
     Game.level++;
     Game.xpNeed = xpNeedFor(Game.level);
+    if (p) {
+      const lvHpGain = Math.max(3, Math.round(p.maxHp * 0.05 + 3));
+      p.maxHp += lvHpGain;
+      p.hp = Math.min(p.maxHp, p.hp + lvHpGain);
+    }
     if (p && Game.level % 5 === 0) {
       const oldDmg = Math.round(effectiveDmg());
       p.coreTier = Math.max(p.coreTier || 1, 1 + Math.floor(Game.level / 5));

@@ -10,7 +10,7 @@ const CFG = {
   player: {
     r: 14,
     speed: 230,
-    maxHp: 30,
+    maxHp: 60,
     pickup: 95,
     fireInterval: 0.62,
     dmg: 1,
@@ -428,12 +428,19 @@ const SKILLS = [
     apply: p => { p.stats.speed *= 1.12; },
   },
   {
-    id: 'hp', name: '黑八钢骨配重壳', type: 'stat', archetype: 'billiard', archPts: 1, maxLv: 6,
-    desc: () => '生命上限提升 26%（+4 固定），并立即回复等额生命。',
-    apply: p => {
-      const gain = Math.max(6, Math.round(p.maxHp * 0.26 + 4));
+    id: 'hp', name: '黑八钢骨配重壳', type: 'stat', archetype: 'billiard', archPts: 1, maxLv: 6, midLv: 3,
+    desc: () => '生命上限提升 28%（+6 固定），并立即回复等额生命。',
+    midDesc: '【中阶 · 钢骨反震】额外提供 +6% 伤害减免。',
+    capstoneDesc: '【高阶 · 不朽泰坦核】生命 ≥ 60% 时，每 100 点生命上限额外提供 +25% 全局伤害（上限 +150%）。',
+    apply: (p, lv) => {
+      const gain = Math.max(10, Math.round(p.maxHp * 0.28 + 6));
       p.maxHp += gain;
       p.hp = Math.min(p.maxHp, p.hp + gain);
+      if (lv >= 3 && !p.stats.midHp) {
+        p.stats.midHp = true;
+        p.stats.armor = Math.min(0.65, p.stats.armor + 0.06);
+      }
+      if (lv >= 6) p.stats.capHp = true;
     },
   },
   {
@@ -664,7 +671,7 @@ const ORBS = {
     stroke: '#111315',
     ringColor: '#0055FF',
     cd: 2.4,
-    maxHp: 30,
+    maxHp: 60,
     speedMul: 1.10,
     fireMul: 0.90,
     dmgBonus: 0,
@@ -689,7 +696,7 @@ const ORBS = {
     stroke: '#111315',
     ringColor: '#E63312',
     cd: 3.4,
-    maxHp: 38,
+    maxHp: 76,
     speedMul: 0.96,
     fireMul: 1.12,
     dmgBonus: 1,
@@ -716,7 +723,7 @@ const ORBS = {
     stroke: '#111315',
     ringColor: '#D97706',
     cd: 3.2,
-    maxHp: 30,
+    maxHp: 60,
     speedMul: 1.0,
     fireMul: 1.00,
     dmgBonus: 0,
