@@ -9,10 +9,10 @@ const UI = {
     const ids = [
       'hud', 'hpFill', 'hpLabel', 'xpFill', 'xpLabel', 'lvLabel', 'tierBadge', 'clock', 'threat',
       'kills', 'dps', 'btnMute', 'btnPauseHud', 'bossbar', 'bossFill', 'bossName', 'dock', 'dashbox', 'dashArc', 'dashLabel', 'dashCharges', 'tip',
-      'screenTitle', 'brandBall', 'orbGrid', 'orbSummary', 'diffGrid', 'diffSummary', 'btnStart', 'record',
+      'screenTitle', 'brandBall', 'orbGrid', 'orbSummary', 'diffGrid', 'diffSummary', 'btnStart', 'btnEndlessToggle', 'record',
       'screenLevel', 'lvHead', 'lvTitle', 'lvSub', 'lvNum', 'cards',
       'screenPause', 'pauseStats', 'btnResume', 'btnQuit',
-      'screenOver', 'overTitle', 'overSub', 'overStats', 'overBuild', 'btnAgain', 'btnTitle',
+      'screenOver', 'overTitle', 'overSub', 'overStats', 'overBuild', 'btnContinueEndless', 'btnAgain', 'btnTitle',
     ];
     for (const id of ids) this.el[id] = document.getElementById(id);
 
@@ -20,6 +20,20 @@ const UI = {
     this.renderDifficulties();
 
     this.el.btnStart.onclick = () => { Sfx.init(); Game.start(); };
+    if (this.el.btnHistory) this.el.btnHistory.onclick = () => { Sfx.init(); this.showHistory(); };
+    if (this.el.btnCloseHistory) this.el.btnCloseHistory.onclick = () => this.hideHistory();
+    if (this.el.btnClearHistory) {
+      this.el.btnClearHistory.onclick = () => {
+        if (typeof Analytics !== 'undefined') Analytics.clearHistory();
+        this.showHistory();
+      };
+    }
+    if (this.el.btnEndlessToggle) {
+      this.el.btnEndlessToggle.onclick = () => { Sfx.init(); Game.toggleEndlessMode(); };
+    }
+    if (this.el.btnContinueEndless) {
+      this.el.btnContinueEndless.onclick = () => { Sfx.init(); Game.continueEndless(); };
+    }
     this.el.btnAgain.onclick = () => { Sfx.init(); Game.start(); };
     this.el.btnTitle.onclick = () => Game.toTitle();
     this.el.btnResume.onclick = () => Game.resume();
@@ -147,6 +161,7 @@ const UI = {
     this.el.screenLevel.classList.add('hidden');
     this.el.screenPause.classList.add('hidden');
     this.el.screenOver.classList.add('hidden');
+    if (this.el.screenHistory) this.el.screenHistory.classList.add('hidden');
   },
 
   showTitle(best) {
@@ -155,7 +170,22 @@ const UI = {
     this.el.screenTitle.classList.remove('hidden');
     this.syncOrb();
     this.syncDifficulty();
+    this.syncEndlessBtn();
     this.updateRecord(best);
+  },
+
+  syncEndlessBtn() {
+    if (!this.el.btnEndlessToggle) return;
+    const on = !!Game.endlessMode;
+    this.el.btnEndlessToggle.classList.toggle('active', on);
+    this.el.btnEndlessToggle.textContent = on ? '∞ 无尽模式：开' : '∞ 无尽模式：关';
+    if (this.el.btnEndlessToggle.setAttribute) {
+      this.el.btnEndlessToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  },
+
+  hideOver() {
+    if (this.el.screenOver) this.el.screenOver.classList.add('hidden');
   },
 
   showGame() {
@@ -232,22 +262,26 @@ const UI = {
     const isCapstone = (lv + 1 >= s.maxLv) && !!s.capstoneDesc;
     const isMid = !isCapstone && !!s.midLv && (lv + 1 === s.midLv) && !!s.midDesc;
     let pips = '';
-    for (let k = 0; k < s.maxLv; k++) {
-      const cls = k < lv ? 'on' : (k === lv ? 'new' : '');
-      pips += '<i class="' + cls + '"></i>';
+    if (!s.isEndless) {
+      for (let k = 0; k < s.maxLv; k++) {
+        const cls = k < lv ? 'on' : (k === lv ? 'new' : '');
+        pips += '<i class="' + cls + '"></i>';
+      }
     }
     const isNew = lv === 0;
-    const tagTxt = willSuper
-      ? 'Ⅳ阶 · 触发双极叠加态'
-      : willStage3
-        ? 'Ⅲ阶 · 终极觉醒'
-        : isCapstone
-          ? 'MAX · 终极觉醒'
-          : willStage2
-            ? 'Ⅱ阶 · 中间形态 ★'
-            : isMid
-              ? 'STAGE II · 中阶质变'
-              : (type.code + ' · ' + type.label + (s.dual ? ' · 双向' : (isNew ? ' · NEW' : ' · ' + (lv + 1) + '/' + s.maxLv)));
+    const tagTxt = s.isEndless
+      ? '∞ 超频 · LV.' + (lv + 1)
+      : willSuper
+        ? 'Ⅳ阶 · 触发双极叠加态'
+        : willStage3
+          ? 'Ⅲ阶 · 终极觉醒'
+          : isCapstone
+            ? 'MAX · 终极觉醒'
+            : willStage2
+              ? 'Ⅱ阶 · 中间形态 ★'
+              : isMid
+                ? 'STAGE II · 中阶质变'
+                : (type.code + ' · ' + type.label + (s.dual ? ' · 双向' : (isNew ? ' · NEW' : ' · ' + (lv + 1) + '/' + s.maxLv)));
 
     let archBlock = '';
     if (archMeta && evo) {
@@ -375,6 +409,9 @@ const UI = {
     ]);
 
     this.el.overBuild.innerHTML = this.buildChipsHTML();
+    if (this.el.btnContinueEndless) {
+      this.el.btnContinueEndless.classList.toggle('hidden', !(win && !Game.endless));
+    }
     this.el.screenOver.classList.remove('hidden');
   },
 
@@ -422,9 +459,18 @@ const UI = {
     }
 
     this.el.clock.textContent = fmtTime(Game.time);
-    const left = Math.max(0, CFG.duration - Game.time);
     const d = typeof getDifficulty === 'function' ? getDifficulty() : null;
-    this.el.threat.textContent = (d ? d.name + ' · ' : '') + '威胁等级 ' + threatAt(Game.time) + ' · 剩余 ' + fmtTime(left);
+    if (Game.endless) {
+      if (Game.time >= CFG.duration) {
+        const wave = 1 + Math.floor((Game.time - CFG.duration) / 30);
+        this.el.threat.textContent = (d ? d.name + ' · ' : '') + '∞ 无尽第 ' + wave + ' 轮 · 威胁 ' + threatAt(Game.time);
+      } else {
+        this.el.threat.textContent = (d ? d.name + ' · ' : '') + '∞ 无尽协议 · 威胁等级 ' + threatAt(Game.time);
+      }
+    } else {
+      const left = Math.max(0, CFG.duration - Game.time);
+      this.el.threat.textContent = (d ? d.name + ' · ' : '') + '威胁等级 ' + threatAt(Game.time) + ' · 剩余 ' + fmtTime(left);
+    }
 
     this.el.kills.textContent = Game.kills;
     this.el.dps.textContent = fmt(Game.dps);

@@ -248,6 +248,10 @@ const SKILL_SVGS = {
   charge_matrix:  '<rect x="4" y="6" width="6" height="12"/><rect x="14" y="6" width="6" height="12" fill="currentColor" stroke="none"/>',
   singularity_magnet: '<circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>',
   antimatter_shield: '<polygon points="12 2 21 7 21 17 12 22 3 17 3 7"/><circle cx="12" cy="12" r="4"/>',
+  od_power:       '<polygon points="12 2 15 9 22 9 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9 9 9"/>',
+  od_vital:       '<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="10"/>',
+  od_haste:       '<polygon points="13 2 5 14 11 14 10 22 19 10 13 10 13 2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9.5" stroke-dasharray="3 3"/>',
+  od_greed:       '<rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/>',
 };
 
 function skillIcon(id, size) {
@@ -598,6 +602,45 @@ const SKILLS = [
 const SKILL_MAP = {};
 for (const s of SKILLS) SKILL_MAP[s.id] = s;
 
+/* ══════════════ 无尽超频模组池（常规池耗尽时补位，可无限叠加） ══════════════ */
+const ENDLESS_SKILLS = [
+  {
+    id: 'od_power', name: '超频 · 熵增打击', type: 'attack', isEndless: true, maxLv: 99,
+    desc: () => '无限叠加：全局伤害 ×1.18，暴击伤害倍率 +0.15。',
+    apply: p => {
+      p.stats.dmgMul *= 1.18;
+      p.stats.critMult += 0.15;
+    },
+  },
+  {
+    id: 'od_vital', name: '超频 · 永动装甲', type: 'stat', isEndless: true, maxLv: 99,
+    desc: () => '无限叠加：生命上限 +20%，并立即回复 50% 最大生命。',
+    apply: p => {
+      const g = Math.max(12, Math.round(p.maxHp * 0.20));
+      p.maxHp += g;
+      p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.50));
+    },
+  },
+  {
+    id: 'od_haste', name: '超频 · 量子发条', type: 'stat', isEndless: true, maxLv: 99,
+    desc: () => '无限叠加：射击间隔 -8%、移速 +5%、主动技能冷却 -8%。',
+    apply: p => {
+      p.stats.fireInterval *= 0.92;
+      p.stats.speed *= 1.05;
+      p.stats.dashCd *= 0.92;
+    },
+  },
+  {
+    id: 'od_greed', name: '超频 · 猎杀狂潮', type: 'special', isEndless: true, maxLv: 99,
+    desc: () => '无限叠加：经验获取 +15%，全局伤害 ×1.10。',
+    apply: p => {
+      p.stats.xpMul += 0.15;
+      p.stats.dmgMul *= 1.10;
+    },
+  },
+];
+for (const s of ENDLESS_SKILLS) SKILL_MAP[s.id] = s;
+
 /* ══════════════ Boss 核心遗物（含 +3 流派共鸣触媒） ══════════════ */
 const RELICS = [
   {
@@ -607,8 +650,12 @@ const RELICS = [
     color: '#D97706',
     archetypes: ['xianxia', 'arcane'],
     catalystPts: 3,
-    desc: '生成继承 50% 属性的镜像副球同步射击，并注入 +3 仙侠/奥术流派共鸣点数。',
-    apply: p => { p.relics.twinCore = true; },
+    desc: '生成镜像副球同步射击，本体弹数 +1 且全局伤害 ×1.15，注入 +3 仙侠/奥术共鸣。',
+    apply: p => {
+      p.relics.twinCore = true;
+      p.stats.bullets += 1;
+      p.stats.dmgMul *= 1.15;
+    },
   },
   {
     id: 'charge_matrix',
@@ -617,10 +664,12 @@ const RELICS = [
     color: '#0055FF',
     archetypes: ['norse', 'exact_zero'],
     catalystPts: 3,
-    desc: '空格主动技能最大充能次数 +1，并注入 +3 北欧/归零流派共鸣点数。',
+    desc: '空格充能 +1、冷却 -28%、全局伤 ×1.18，施放主动技获 1.8s 超频，注入 +3 北欧/归零共鸣。',
     apply: p => {
       p.maxCharges += 1;
       p.charges = Math.min(p.maxCharges, p.charges + 1);
+      p.stats.dashCd *= 0.72;
+      p.stats.dmgMul *= 1.18;
     },
   },
   {
@@ -630,10 +679,12 @@ const RELICS = [
     color: '#00A86B',
     archetypes: ['exact_zero', 'xuanhuan'],
     catalystPts: 3,
-    desc: '全屏吸取经验且每 15 颗触发电弧链，并注入 +3 归零/玄幻流派共鸣点数。',
+    desc: '全屏吸经验、经验 +25%、全局伤 ×1.15，且每 8 颗触发电弧链，注入 +3 归零/玄幻共鸣。',
     apply: p => {
       p.relics.singularityMagnet = true;
       p.stats.pickup = Math.max(p.stats.pickup, 4000);
+      p.stats.xpMul += 0.25;
+      p.stats.dmgMul *= 1.15;
     },
   },
   {
@@ -643,11 +694,13 @@ const RELICS = [
     color: '#E63312',
     archetypes: ['xuanhuan', 'billiard'],
     catalystPts: 3,
-    desc: '每 12 秒生成护盾（碎盾 260px 震爆），并注入 +3 玄幻/台球流派共鸣点数。',
+    desc: '每 7.5s 生成护盾（碎盾 340px 高伤震爆）、减伤 +12%、全局伤 ×1.20，注入 +3 玄幻/台球共鸣。',
     apply: p => {
       p.relics.antimatterShield = true;
       p.shieldActive = true;
       p.shieldCd = 0;
+      p.stats.armor = Math.min(0.65, p.stats.armor + 0.12);
+      p.stats.dmgMul *= 1.20;
     },
   },
 ];
@@ -806,9 +859,13 @@ function xpNeedFor(level, diffId) {
   return Math.max(4, Math.round((6 + level * 7 + level * level * 1.05) * d.xpNeedMul));
 }
 
-/** 敌人血量倍率 —— 平滑递进加压，避免新怪血量断层锁死发育 */
+/** 敌人血量倍率 —— 360s 内平滑膨胀，无尽阶段改为每 30s ×1.42 可控分段增长 */
 function hpScaleAt(t, diffId) {
   const d = getDifficulty(diffId);
+  if (t > CFG.duration) {
+    const base360 = (1 + (CFG.duration / 46) * (1 + CFG.duration / 64)) * Math.pow(1.0148, CFG.duration) * d.hpMul;
+    return base360 * Math.pow(1.42, (t - CFG.duration) / 30);
+  }
   return (1 + (t / 46) * (1 + t / 64)) * Math.pow(1.0148, t) * d.hpMul;
 }
 
@@ -818,10 +875,11 @@ function dmgScaleAt(t, diffId) {
   return (1 + (t / 110) * (1 + t / 150)) * Math.pow(1.0048, t) * d.dmgMul;
 }
 
-/** 每秒刷怪数 —— 从 1.35/s 起步，平稳攀升至 10.0/s（随难度倍率缩放） */
+/** 每秒刷怪数 —— 从 1.35/s 起步，常规攀升至 10.0/s，无尽上限 12.5/s */
 function spawnRateAt(t, diffId) {
   const d = getDifficulty(diffId);
-  return Math.min(10.0 * d.spawnMul, (1.35 + t / 24) * d.spawnMul);
+  const cap = t > CFG.duration ? 12.5 : 10.0;
+  return Math.min(cap * d.spawnMul, (1.35 + t / 24) * d.spawnMul);
 }
 
 /** 当前威胁等级（仅展示） */

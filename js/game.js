@@ -8,6 +8,7 @@ const keys = Object.create(null);
 const RECORD_KEY = 'orbrogue_record_v1';
 const DIFF_KEY = 'orbrogue_diff_v1';
 const ORB_KEY = 'orbrogue_orb_v1';
+const CODEX_KEY = 'zero_axiom_codex_v1';
 
 const Game = {
   state: 'menu',
@@ -66,14 +67,40 @@ const Game = {
   choices: [],
   sepTick: 0,
   wantDash: false,
+  telemetry: null,
+  lastRunSummary: null,
 
   menuT: 0,
   menuBalls: [],
   orb: 'cobalt',
   difficulty: 'normal',
+  endlessMode: false,
+  endless: false,
+  endlessBossT: 450,
+  endlessBeaconT: 405,
   record: { time: 0, kills: 0, level: 1, byDiff: {} },
+  codexReturnState: null,
+  codexHistory: { combos: {}, archs: {} },
 
   /* ───────── 流程 ───────── */
+  toggleEndlessMode() {
+    this.endlessMode = !this.endlessMode;
+    if (UI.syncEndlessBtn) UI.syncEndlessBtn();
+  },
+
+  continueEndless() {
+    if (this.state !== 'win' || !this.player) return;
+    this.endless = true;
+    this.state = 'playing';
+    this.endlessBossT = Math.max(this.time + 90, 450);
+    this.endlessBeaconT = Math.max(this.time + 45, 405);
+    this.player.iframe = Math.max(this.player.iframe || 0, 2.0);
+    this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.round(this.player.maxHp * 0.4));
+    if (UI.hideOver) UI.hideOver();
+    UI.syncHud(1, true);
+    addText(this.player.x, this.player.y - 60, '∞ 进入无尽轮回', '#E63312', 24);
+    Sfx.play('beacon');
+  },
   setOrb(id) {
     if (!ORBS[id]) return;
     this.orb = id;
@@ -109,12 +136,41 @@ const Game = {
   },
 
   togglePause() {
+    if (this.state === 'codex') {
+      this.closeCodex();
+      return;
+    }
     if (this.state === 'playing') {
       this.state = 'paused';
       UI.showPause();
     } else if (this.state === 'paused') {
       this.resume();
     }
+  },
+
+  openCodex(tab) {
+    if (this.state === 'codex') {
+      if (tab && UI.setCodexTab) UI.setCodexTab(tab);
+      return;
+    }
+    if (this.state !== 'menu' && this.state !== 'playing' && this.state !== 'paused') return;
+    this.codexReturnState = this.state;
+    this.state = 'codex';
+    if (UI.showCodex) UI.showCodex(tab);
+  },
+
+  closeCodex() {
+    if (this.state !== 'codex') return;
+    const prev = this.codexReturnState || 'menu';
+    this.codexReturnState = null;
+    this.state = prev;
+    if (UI.hideCodex) UI.hideCodex();
+    if (prev === 'paused' && UI.showPause) UI.showPause();
+  },
+
+  toggleCodex() {
+    if (this.state === 'codex') this.closeCodex();
+    else this.openCodex();
   },
 
   openLevelUp() {
@@ -171,6 +227,10 @@ const Game = {
       const newLv = (this.owned[c.skill.id] || 0) + 1;
       this.owned[c.skill.id] = newLv;
       c.skill.apply(p, newLv);
+      if (this.telemetry) {
+        this.telemetry.buildOrder.push(c.skill.id);
+        if (newLv >= c.skill.maxLv && c.skill.capstoneDesc) this.telemetry.capstones++;
+      }
       applySkillArchPts(p, c.skill);
       this.pendingLevel = Math.max(0, this.pendingLevel - 1);
       UI.hideLevelUp();
@@ -225,6 +285,10 @@ const Game = {
     if (this.state === 'dead' || this.state === 'win') return;
     this.state = win ? 'win' : 'dead';
     saveRecord();
+    if (typeof Analytics !== 'undefined') {
+      this.lastRunSummary = Analytics.buildRunSummary(win);
+      Analytics.saveRun(this.lastRunSummary);
+    }
     UI.syncHud(1, true);
     UI.showOver(win);
     Sfx.play(win ? 'win' : 'dead');
@@ -276,6 +340,7 @@ function bindInput() {
       return;
     }
     if (k === 'enter' && Game.state === 'menu') { Game.start(); return; }
+    if (k === 'c') { Game.toggleCodex(); return; }
     if (k === 'p' || k === 'escape') { Game.togglePause(); return; }
     if (k === 'm') { Sfx.toggleMute(); UI.syncMute(); return; }
 
@@ -317,7 +382,22 @@ function loadRecord() {
         }
       }
     }
+    const rawCodex = localStorage.getItem(CODEX_KEY);
+    if (rawCodex) {
+      const cObj = JSON.parse(rawCodex);
+      if (cObj && typeof cObj === 'object') {
+        if (cObj.combos && typeof cObj.combos === 'object') Game.codexHistory.combos = cObj.combos;
+        if (cObj.archs && typeof cObj.archs === 'object') Game.codexHistory.archs = cObj.archs;
+      }
+    }
   } catch (err) { /* 忽略 */ }
+}
+
+function recordCodexDiscovery(kind, id) {
+  if (!id || !Game.codexHistory || !Game.codexHistory[kind]) return;
+  if (Game.codexHistory[kind][id]) return;
+  Game.codexHistory[kind][id] = true;
+  try { localStorage.setItem(CODEX_KEY, JSON.stringify(Game.codexHistory)); } catch (err) { /* 忽略 */ }
 }
 
 function saveRecord() {
@@ -342,6 +422,9 @@ function resetRun() {
   const c = CFG.player;
 
   Game.time = 0;
+  Game.endless = !!Game.endlessMode;
+  Game.endlessBossT = 450;
+  Game.endlessBeaconT = 405;
   Game.kills = 0;
   Game.dmgDealt = 0;
   Game.dps = 0;
@@ -366,6 +449,8 @@ function resetRun() {
   Game.flash = 0;
   Game.sepTick = 0;
   Game.wantDash = false;
+  Game.telemetry = typeof Analytics !== 'undefined' ? Analytics.createTelemetry() : null;
+  Game.lastRunSummary = null;
   Game.orbPos.length = 0;
   Game.enemies.length = 0;
   Game.bullets.length = 0;
@@ -693,6 +778,7 @@ function onEnterStage2(p, archId) {
 }
 
 function onEnterStage3(p, archId) {
+  recordCodexDiscovery('archs', archId);
   const m = getArchMeta(archId);
   const stName = getArchStageName(archId, 2);
   if (archId === 'xianxia') {
@@ -706,6 +792,7 @@ function onEnterStage3(p, archId) {
 }
 
 function onEnterStage4(p, combo) {
+  if (combo && combo.id && !combo.isFallback) recordCodexDiscovery('combos', combo.id);
   if (combo.isFallback && !p._fallbackApplied) {
     p._fallbackApplied = true;
     p.stats.dmgMul *= 1.35;
@@ -1014,6 +1101,7 @@ function update(dt) {
   if (Game.dpsT >= 0.25) {
     const inst = Game.dmgDealt / Game.dpsT;
     Game.dps = Game.dps * 0.65 + inst * 0.35;
+    if (Game.telemetry && Game.dps > Game.telemetry.peakDps) Game.telemetry.peakDps = Game.dps;
     Game.dmgDealt = 0;
     Game.dpsT = 0;
   }
@@ -1021,7 +1109,7 @@ function update(dt) {
   UI.syncHud(dt);
 
   if (p.hp <= 0) { Game.gameOver(false); return; }
-  if (Game.time >= CFG.duration) { Game.gameOver(true); return; }
+  if (!Game.endless && Game.time >= CFG.duration) { Game.gameOver(true); return; }
   if (Game.pendingRelic > 0) { Game.openRelicChoice(); return; }
   if (Game.pendingLevel > 0) { Game.openLevelUp(); return; }
 }
@@ -1070,6 +1158,10 @@ function updatePlayer(dt) {
   p.vy += (dirY * speed - p.vy) * k;
   p.x += p.vx * dt;
   p.y += p.vy * dt;
+  if (Game.telemetry) {
+    Game.telemetry.moveDist += Math.hypot(p.vx, p.vy) * dt;
+    if (len === 0 && p.dashT <= 0) Game.telemetry.idleTime += dt;
+  }
 
   if (len > 0) p.facing = Math.atan2(ay, ax);
 
@@ -1118,7 +1210,9 @@ function updatePlayer(dt) {
 
   const totalRegen = s.regen + p.maxHp * (s.regenPct || 0);
   if (totalRegen > 0 && p.hp < p.maxHp) {
+    const beforeHp = p.hp;
     p.hp = Math.min(p.maxHp, p.hp + totalRegen * dt);
+    if (Game.telemetry) Game.telemetry.healed += (p.hp - beforeHp);
   }
 
   let fireMul = 1;
@@ -1378,6 +1472,8 @@ function triggerOrbSkill() {
 
   if (p.charges <= 0) return;
   p.charges--;
+  if (Game.telemetry) Game.telemetry.skillCasts++;
+  if (p.maxCharges >= 2) p.overclockT = Math.max(p.overclockT || 0, 1.8);
   const effectiveCd = p.beaconBuffT > 0 ? Math.min(0.25, s.dashCd) : s.dashCd;
   if (p.dashCd <= 0) p.dashCd = effectiveCd;
 
@@ -1954,6 +2050,14 @@ function damageEnemy(e, dmg, crit, from) {
     e.squashAngle = rand(0, TAU);
   }
   Game.dmgDealt += d;
+  if (Game.telemetry) {
+    if (crit && d > Game.telemetry.maxCritDmg) Game.telemetry.maxCritDmg = d;
+    if (from && from.isBilliard) { Game.telemetry.dmgBilliard += d; Game.telemetry.billiardHits++; }
+    else if (from && from.isExactZeroBurst) { Game.telemetry.dmgExactZero += d; }
+    else if (from && from.isOverkillArc) { Game.telemetry.dmgOverkill += d; }
+    else if (from && from.primary) { Game.telemetry.dmgPrimary += d; }
+    else { Game.telemetry.dmgSub += d; }
+  }
 
   const isCollide = from && from.isBilliard;
   const numStr = fmt(d);
@@ -1990,6 +2094,7 @@ function damageEnemy(e, dmg, crit, from) {
     // 【精准归零】非单发秒杀基础小怪时，伤害分毫不差打成 0 触发归零爆发
     if (e.hp === 0 && (e.maxHp > d || e.hitCount >= 2 || e.exactForced) && !(from && from.isExactZeroBurst)) {
       e.exactZero = true;
+      if (Game.telemetry) Game.telemetry.exactZeroCount++;
       const ezR = ezSt >= 3 ? 115 : 80;
       addText(e.x, e.y - e.r - 16, '✦ 归零', '#D97706', ezSt >= 3 ? 26 : 24, { crit: true, vy: -82, life: 0.9 });
       Game.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 6, maxR: ezR, life: 0.28, max: 0.28, color: '#FFB800', dead: false });
@@ -2024,6 +2129,7 @@ function damageEnemy(e, dmg, crit, from) {
       const overkill = -e.hp;
       const minOverkill = ezSt >= 2 ? 3 : Math.max(2, effectiveDmg() * 0.45);
       if (overkill >= minOverkill) {
+        if (Game.telemetry) Game.telemetry.overkillCount++;
         const ratio = ezSt >= 2 ? 0.80 : 0.75;
         const range = ezSt >= 3 ? 220 : (ezSt >= 2 ? 180 : 190);
         const maxJumps = ezSt >= 3 ? 3 : 1;
@@ -2126,10 +2232,12 @@ function killEnemy(e, from) {
     Game.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 16, maxR: 220, life: 0.45, max: 0.45, color: '#FFB800', dead: false });
     Sfx.play('boom');
     addShake(24);
-    if (tier >= 3) {
+    if (tier >= 3 && !Game.endless) {
       Game.gameOver(true);
-    } else {
+    } else if (Object.keys(Game.ownedRelics).length < RELICS.length) {
       Game.pendingRelic++;
+    } else {
+      Game.pendingLevel++;
     }
   }
 }
@@ -2237,11 +2345,20 @@ function updateSpawner(dt) {
     spawnEnemy(pickEnemyType(Game.time));
   }
 
-  // 三阶段首领：110s / 230s / 340s
+  // 三阶段首领：110s / 220s / 330s
   if (Game.bossIdx < BOSS_CONFIGS.length && Game.time >= BOSS_CONFIGS[Game.bossIdx].time) {
     const cfg = BOSS_CONFIGS[Game.bossIdx];
     Game.bossIdx++;
     spawnBoss(cfg);
+  } else if (Game.endless && Game.time >= Game.endlessBossT) {
+    const loop = Math.max(1, Math.floor((Game.time - CFG.duration) / 90) + 1);
+    Game.endlessBossT += 90;
+    spawnBoss({ tier: 3 + loop, label: '无尽主宰 · 第 ' + loop + ' 轮回', r: 64, hpMul: 1.0, speed: 78, dmg: 14 });
+  }
+
+  if (Game.endless && Game.time >= Game.endlessBeaconT) {
+    Game.endlessBeaconT += 50;
+    if (typeof spawnBeacon === 'function') spawnBeacon();
   }
 
   // 突发波次事件：01:15 (75s) 疾行包围圈，03:00 (180s) 数字金潮
@@ -2318,6 +2435,7 @@ function updateBeacons(dt) {
 
 function captureBeacon(b) {
   b.dead = true;
+  if (Game.telemetry) Game.telemetry.beaconsCaptured++;
   const p = Game.player;
   Game.fx.push({ kind: 'ring', x: b.x, y: b.y, r: 12, maxR: 320, life: 0.44, max: 0.44, color: b.reward.color, dead: false });
   const clearDmg = Math.max(4, Math.round(4 + effectiveDmg() * 2));
@@ -2712,15 +2830,15 @@ function separateEnemies() {
 
 function triggerAntimatterBreak(p) {
   p.shieldActive = false;
-  p.shieldCd = 12.0;
-  p.iframe = Math.max(p.iframe, 0.8);
+  p.shieldCd = 7.5;
+  p.iframe = Math.max(p.iframe, 0.9);
   addText(p.x, p.y - p.r - 18, '✦ 护盾反冲', '#E63312', 20);
-  Game.fx.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: 260, life: 0.4, max: 0.4, color: '#E63312', dead: false });
-  const dmg = Math.max(6, Math.round(6 + effectiveDmg() * 4));
+  Game.fx.push({ kind: 'ring', x: p.x, y: p.y, r: 12, maxR: 340, life: 0.4, max: 0.4, color: '#E63312', dead: false });
+  const dmg = Math.max(12, Math.round(12 + effectiveDmg() * 7.5));
   for (let i = 0; i < Game.enemies.length; i++) {
     const e = Game.enemies[i];
     if (e.dead) continue;
-    const rr = 260 + e.r;
+    const rr = 340 + e.r;
     if (distSq(p.x, p.y, e.x, e.y) <= rr * rr) {
       damageEnemy(e, dmg, true, { x: p.x, y: p.y });
       const d = Math.sqrt(distSq(e.x, e.y, p.x, p.y)) || 1;
@@ -2746,6 +2864,7 @@ function hurtPlayer(e) {
   const hitCap = Math.max(1, Math.floor(p.maxHp * 0.28));
   const dmg = Math.min(rawDmg, hitCap);
   p.hp -= dmg;
+  if (Game.telemetry) Game.telemetry.dmgTaken += dmg;
   p.iframe = CFG.player.iframe;
   Game.flash = 0.9;
   addShake(9);
@@ -2806,6 +2925,7 @@ function updateEBullets(dt) {
           const hitCap = Math.max(1, Math.floor(p.maxHp * 0.28));
           const dmg = Math.min(rawDmg, hitCap);
           p.hp -= dmg;
+          if (Game.telemetry) Game.telemetry.dmgTaken += dmg;
           p.iframe = CFG.player.iframe;
           Game.flash = 0.8;
           addShake(7);
@@ -3500,7 +3620,7 @@ function updateDrops(dt) {
       Sfx.play('pick');
       if (p.relics.singularityMagnet) {
         p.xpPickCount++;
-        if (p.xpPickCount % 15 === 0) castChain();
+        if (p.xpPickCount % 8 === 0) castChain();
       }
     }
   }
@@ -3853,6 +3973,16 @@ function rollSkills(n) {
       const last = out.length - 1;
       pool.push(out[last].skill);
       out[last] = { skill: s, lv: owned[s.id] || 0 };
+    }
+  }
+
+  // 无尽模式：常规卡池不足 3 张时，从 ENDLESS_SKILLS 无限超频池补齐
+  if (Game.endless && out.length < n && typeof ENDLESS_SKILLS !== 'undefined') {
+    const odPool = ENDLESS_SKILLS.filter(s => out.every(o => o.skill.id !== s.id));
+    while (out.length < n && odPool.length > 0) {
+      const idx = Math.floor(Math.random() * odPool.length);
+      const s = odPool.splice(idx, 1)[0];
+      out.push({ skill: s, lv: owned[s.id] || 0 });
     }
   }
   return out;

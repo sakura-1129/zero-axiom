@@ -39,6 +39,7 @@
     <div class="kpi"><b id="kills">0</b><span>击杀</span></div>
     <div class="kpi"><b id="dps">0</b><span>秒伤</span></div>
     <div class="hud-actions">
+      <button class="hud-btn" id="btnCodexHud" title="合成图鉴 (C)">图</button>
       <button class="hud-btn" id="btnMute" title="静音 (M)">M</button>
       <button class="hud-btn" id="btnPauseHud" title="暂停 (P)">P</button>
     </div>
@@ -109,7 +110,11 @@
     </div>
 
     <div class="title-foot">
-      <button class="btn" id="btnStart">开始游戏</button>
+      <div class="title-actions">
+        <button class="btn" id="btnStart">开始游戏</button>
+        <button type="button" class="btn ghost endless-toggle" id="btnEndlessToggle" aria-pressed="false">∞ 无尽模式：关</button>
+        <button type="button" class="btn ghost" id="btnCodexTitle">合成图鉴</button>
+      </div>
       <div class="record" id="record">最佳存活 00:00 · 最高击杀 0</div>
     </div>
   </div>
@@ -119,7 +124,7 @@
     <div class="swiss-meta">
       <span>PATCH NOTES</span>
       <span>SYS / LOG</span>
-      <span>V2.4</span>
+      <span>V2.6</span>
     </div>
 
     <div class="notice-head">
@@ -130,13 +135,34 @@
     <div class="notice-list">
       <div class="notice-item latest">
         <div class="notice-ver">
-          <b>v2.4 · 生存与流派全面强化</b>
+          <b>v2.6 · 无尽模式 (Demo) 上线</b>
           <span>NEW</span>
         </div>
         <ul>
-          <li><b>生命成长全面升级</b>：初始生命翻倍（60/76/60），每次升级自动 +5%+3 生命上限，黑八配重壳高阶可将血量转化为输出。</li>
-          <li><b>短链流派加强</b>：霍格沃茨回旋咒升格 8 级核心（命中即折返），同步强化化劲/时压/血祭与多重齐射。</li>
-          <li><b>屏震收敛 & 阶位统一</b>：大幅收敛清怪屏幕抖动；满级觉醒统一更名为【高阶】。</li>
+          <li><b>双入口无尽协议</b>：首页可一键开启无尽模式，或 6 分钟通关后点击「继续无尽」保留当前构筑继续挑战。</li>
+          <li><b>无限超频模组 & 轮回首领</b>：常规池抽满后解锁 4 张无限超频卡，每 90s 刷新无尽轮回主宰。</li>
+        </ul>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-ver">
+          <b>v2.5 · Boss 遗物与血量成长</b>
+          <span>BAL</span>
+        </div>
+        <ul>
+          <li><b>遗物全面增强</b>：双生道果(+1弹/×1.15伤)、雷神矩阵(-28%冷却+超频)、奇点磁极(8颗电弧)、金钟罩(7.5s/340px震爆)。</li>
+          <li><b>生命成长升级</b>：初始血量翻倍（60/76/60），每次升级 +5%+3 生命上限。</li>
+        </ul>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-ver">
+          <b>v2.4 · 生存容错与流派重塑</b>
+          <span>BAL</span>
+        </div>
+        <ul>
+          <li><b>初始血量翻倍 & 防秒杀</b>：基础生命翻倍（60/76/60），单次受击封顶 28% 最大生命。</li>
+          <li><b>短链流派加强</b>：霍格沃茨回旋咒升格 8 级核心，同步强化化劲/时压/血祭与多重齐射；屏震收敛。</li>
         </ul>
       </div>
 
@@ -185,8 +211,35 @@
     <div class="stats" id="pauseStats"></div>
     <div class="btn-row">
       <button class="btn" id="btnResume">继续</button>
+      <button type="button" class="btn ghost" id="btnCodexPause">合成图鉴</button>
       <button class="btn ghost" id="btnQuit">放弃本局</button>
     </div>
+  </div>
+</div>
+
+<!-- ══════════ 合成图鉴 ══════════ -->
+<div class="screen frosted hidden" id="screenCodex">
+  <div class="panel modal-card codex-panel" role="dialog" aria-modal="true" aria-labelledby="codexTitle">
+    <div class="swiss-meta">
+      <span>SYNTHESIS CODEX</span>
+      <span>IV-TIER SUPERPOSITION</span>
+      <span>ARCHETYPE MATRIX</span>
+    </div>
+
+    <div class="codex-head">
+      <div>
+        <h2 id="codexTitle">合成图鉴</h2>
+        <p class="codex-sub" id="codexSub">六大流派三阶进化与 6 种 Ⅳ阶双极叠加态配方</p>
+      </div>
+      <button type="button" class="btn ghost codex-close" id="btnCodexClose">关闭 (ESC)</button>
+    </div>
+
+    <div class="codex-tabs" id="codexTabs" role="tablist">
+      <button type="button" class="codex-tab active" data-tab="combos" role="tab" aria-selected="true">Ⅳ阶 · 双极叠加态 (6)</button>
+      <button type="button" class="codex-tab" data-tab="archs" role="tab" aria-selected="false">六大流派 · 进化与模组</button>
+    </div>
+
+    <div class="codex-body" id="codexBody"></div>
   </div>
 </div>
 
@@ -202,6 +255,7 @@
     <div class="stats" id="overStats"></div>
     <div class="build" id="overBuild"></div>
     <div class="btn-row">
+      <button class="btn hidden" id="btnContinueEndless">∞ 继续无尽</button>
       <button class="btn" id="btnAgain">再来一局</button>
       <button class="btn ghost" id="btnTitle">返回标题</button>
     </div>
