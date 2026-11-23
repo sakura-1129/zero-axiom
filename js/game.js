@@ -475,6 +475,14 @@ function resetRun() {
       capPinball: false,
       midExact: false,
       capExact: false,
+      midRefract: false,
+      capRefract: false,
+      midMomentum: false,
+      capMomentum: false,
+      midSlow: false,
+      capSlow: false,
+      midVamp: false,
+      capVamp: false,
       orbs: 0, orbDmg: 1, orbPhase: 0,
       chainLv: 0, chainT: 2.2, chainDmg: 1.5, chainJumps: 0,
       shockLv: 0, shockT: 2.4, shockDmg: 2.5, shockR: 88,
@@ -1610,18 +1618,28 @@ function updateBullets(dt) {
       if (b.dead) continue;
     }
 
-    // 【几何折射】飞出可视边界或寿命耗尽时向玩家方向折返一次
+    // 【几何折射 · 霍格沃茨回旋咒】支持多次折返；中阶自动锁敌零衰减；大成 135% 增伤并留六芒星棱镜
     const offScreen = Game.W > 0 && (Math.abs(b.x - Game.cam.x) > Game.W * 0.52 || Math.abs(b.y - Game.cam.y) > Game.H * 0.52);
-    if ((b.life <= 0 || offScreen) && canRefract && !b.refracted && !b.homing) {
+    const refractLeft = b.refractLeft !== undefined ? b.refractLeft : (canRefract && !b.refracted ? p.stats.refract : 0);
+    if ((b.life <= 0 || offScreen) && canRefract && refractLeft > 0 && !b.homing) {
       b.refracted = true;
+      b.refractLeft = refractLeft - 1;
       b.hit.clear();
-      b.dmg = Math.max(1, Math.round(b.dmg * 0.7));
-      b.life = Math.max(0.55, CFG.player.bulletLife * 0.7) * p.stats.refract;
+      const dmgKeep = s.capRefract ? 1.35 : (s.midRefract ? 1.0 : 0.85);
+      b.dmg = Math.max(1, Math.round(b.dmg * dmgKeep));
+      b.life = Math.max(0.65, CFG.player.bulletLife * 0.8);
       const sp = Math.hypot(b.vx, b.vy) || CFG.player.bulletSpeed;
-      const backA = Math.atan2(p.y - b.y, p.x - b.x) + rand(-0.14, 0.14);
+      let backA = Math.atan2(p.y - b.y, p.x - b.x) + rand(-0.14, 0.14);
+      if (s.midRefract) {
+        const refTgt = findNearestEnemy(b.x, b.y, 460);
+        if (refTgt) backA = Math.atan2(refTgt.y - b.y, refTgt.x - b.x);
+      }
       b.vx = Math.cos(backA) * sp;
       b.vy = Math.sin(backA) * sp;
-      Game.fx.push({ kind: 'ring', x: b.x, y: b.y, r: 2, maxR: 12, life: 0.14, max: 0.14, color: '#0055FF', dead: false });
+      Game.fx.push({ kind: 'ring', x: b.x, y: b.y, r: 2, maxR: s.capRefract ? 20 : 12, life: 0.16, max: 0.16, color: s.capRefract ? '#FFB800' : '#0055FF', dead: false });
+      if (s.capRefract && Game.mirrors.length < 8) {
+        Game.mirrors.push({ x: b.x, y: b.y, r: 16, rot: 0, life: 2.2, max: 2.2, perm: false, fireT: 0.15 });
+      }
     }
 
     if (b.life <= 0) { b.dead = true; continue; }
@@ -1848,6 +1866,29 @@ function hitEnemyWithBullet(b, e) {
     b.color = '#E63312';
     return;
   }
+
+  // 【霍格沃茨回旋咒】命中耗尽穿透/弹射时也触发折返，无需打空才能折返
+  const refLeft = b.refractLeft !== undefined ? b.refractLeft : (s ? s.refract : 0);
+  if (s && s.refract > 0 && refLeft > 0 && !b.isSubSwarm) {
+    b.refracted = true;
+    b.refractLeft = refLeft - 1;
+    b.hit.clear();
+    b.hit.add(e.id);
+    const dmgKeep = s.capRefract ? 1.35 : (s.midRefract ? 1.0 : 0.85);
+    b.dmg = Math.max(1, Math.round(b.dmg * dmgKeep));
+    b.life = Math.max(b.life, 0.75);
+    const sp = Math.hypot(b.vx, b.vy) || CFG.player.bulletSpeed;
+    const nxt = s.midRefract ? findNearestEnemyExcept(b.x, b.y, 440, b.hit) : null;
+    const backA = nxt ? Math.atan2(nxt.y - b.y, nxt.x - b.x) : (Math.atan2(p.y - b.y, p.x - b.x) + rand(-0.22, 0.22));
+    b.vx = Math.cos(backA) * sp;
+    b.vy = Math.sin(backA) * sp;
+    Game.fx.push({ kind: 'ring', x: b.x, y: b.y, r: 2, maxR: s.capRefract ? 20 : 12, life: 0.16, max: 0.16, color: s.capRefract ? '#FFB800' : '#0055FF', dead: false });
+    if (s.capRefract && Game.mirrors.length < 8) {
+      Game.mirrors.push({ x: b.x, y: b.y, r: 16, rot: 0, life: 2.2, max: 2.2, perm: false, fireT: 0.15 });
+    }
+    return;
+  }
+
   b.dead = true;
 }
 

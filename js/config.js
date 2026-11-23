@@ -288,12 +288,12 @@ const SKILLS = [
   },
   {
     id: 'multi', name: '星象仪多重齐射', type: 'attack', archetype: 'arcane', archPts: 1, maxLv: 5, midLv: 3,
-    desc: () => '每次多射出 1 颗弹丸（追踪弹同步 +1），代价：射击间隔 +12%。',
-    midDesc: '【中阶 · 收束阵列】散射角收窄 20%。',
+    desc: () => '每次多射出 1 颗弹丸（追踪弹同步 +1）；Lv.3 起免除射速代价。',
+    midDesc: '【中阶 · 收束阵列】散射角收窄 20%，且免除多重齐射的射速惩罚。',
     capstoneDesc: '【大成 · 天球螺旋矩阵】每次射击额外释放 4 枚旋转交叉弧线弹幕，形成 360° 弹幕网。',
     apply: (p, lv) => {
       p.stats.bullets += 1;
-      p.stats.fireInterval *= 1.12;
+      if (lv < 3) p.stats.fireInterval *= 1.12;
       if (lv >= 3 && !p.stats.midMulti) {
         p.stats.midMulti = true;
         p.stats.spread *= 0.8;
@@ -471,16 +471,43 @@ const SKILLS = [
 
   /* ── 特殊与双向抉择卡 ── */
   {
-    id: 'slow', name: '帧率冻结 · 时间压制', type: 'special', archetype: 'exact_zero', archPts: 1, maxLv: 4,
-    desc: () => '所有敌人移速 -9%。',
-    apply: p => { p.stats.slow = Math.min(0.45, p.stats.slow + 0.09); },
+    id: 'slow', name: '帧率冻结 · 时间压制', type: 'special', archetype: 'exact_zero', archPts: 1, maxLv: 6, midLv: 3,
+    desc: () => '所有敌人移速 -8%（上限 55%），全局伤害 ×1.10。',
+    midDesc: '【中阶 · 时停增伤】对减速态敌球额外提升 +18% 全局输出。',
+    capstoneDesc: '【大成 · 绝对零度时钟】减速上限升至 55%，全局伤害再 ×1.25。',
+    apply: (p, lv) => {
+      p.stats.slow = Math.min(0.55, p.stats.slow + 0.08);
+      p.stats.dmgMul *= 1.10;
+      if (lv >= 3 && !p.stats.midSlow) {
+        p.stats.midSlow = true;
+        p.stats.dmgMul *= 1.18;
+      }
+      if (lv >= 6 && !p.stats.capSlow) {
+        p.stats.capSlow = true;
+        p.stats.dmgMul *= 1.25;
+      }
+    },
   },
   {
-    id: 'vamp', name: '英灵殿血祭', type: 'special', archetype: 'norse', archPts: 1, maxLv: 5,
-    desc: () => '每次击杀回复 1.2% 最大生命 + 0.5。',
-    apply: p => {
-      p.stats.vamp += 0.5;
-      p.stats.vampPct = (p.stats.vampPct || 0) + 0.012;
+    id: 'vamp', name: '英灵殿血祭', type: 'special', archetype: 'norse', archPts: 1, maxLv: 6, midLv: 3,
+    desc: () => '每次击杀回复 1.4% 最大生命 + 0.6，全局伤害 ×1.10。',
+    midDesc: '【中阶 · 狂战嗜血】暴击伤害倍率额外 +0.35。',
+    capstoneDesc: '【大成 · 英灵不朽】全局伤害再 ×1.30，且生命上限 +20%。',
+    apply: (p, lv) => {
+      p.stats.vamp += 0.6;
+      p.stats.vampPct = (p.stats.vampPct || 0) + 0.014;
+      p.stats.dmgMul *= 1.10;
+      if (lv >= 3 && !p.stats.midVamp) {
+        p.stats.midVamp = true;
+        p.stats.critMult += 0.35;
+      }
+      if (lv >= 6 && !p.stats.capVamp) {
+        p.stats.capVamp = true;
+        p.stats.dmgMul *= 1.30;
+        const g = Math.max(8, Math.round(p.maxHp * 0.20));
+        p.maxHp += g;
+        p.hp = Math.min(p.maxHp, p.hp + g);
+      }
     },
   },
   {
@@ -504,14 +531,36 @@ const SKILLS = [
     },
   },
   {
-    id: 'refract', name: '霍格沃茨回旋咒', type: 'special', archetype: 'arcane', archPts: 1, maxLv: 4,
-    desc: () => '子弹飞出屏幕或耗尽射程时自动向回折返（保留 70% 伤害）。',
-    apply: p => { p.stats.refract += 1; },
+    id: 'refract', name: '霍格沃茨回旋咒', type: 'special', archetype: 'arcane', archPts: 2, maxLv: 8, midLv: 4,
+    desc: () => '弹丸可多次折返（+1 次，保留 85% 伤害），且全局伤害 ×1.14。',
+    midDesc: '【中阶 · 星轨校准】折返自动锁定最近敌球追踪，且保留 100% 伤害（零衰减）。',
+    capstoneDesc: '【大成 · 所罗门永动回廊】折返伤害跃升至 135%，且在折返点留下 2.2 秒六芒星折射镜。',
+    apply: (p, lv) => {
+      p.stats.refract += 1;
+      p.stats.dmgMul *= 1.14;
+      if (lv >= 4) p.stats.midRefract = true;
+      if (lv >= 8) p.stats.capRefract = true;
+    },
   },
   {
-    id: 'momentum', name: '凌波微步 · 化劲', type: 'special', archetype: 'xianxia', archPts: 1, maxLv: 4,
-    desc: () => '高于基础移速的部分，每 +10% 移速额外提供 +12% 全局伤害。',
-    apply: p => { p.stats.momentum += 1; },
+    id: 'momentum', name: '凌波微步 · 化劲', type: 'special', archetype: 'xianxia', archPts: 1, maxLv: 6, midLv: 3,
+    desc: () => '移速 +6%，高于基础移速每 +10% 额外提供 +15% 全局伤害。',
+    midDesc: '【中阶 · 剑意化形】移速加成转化为伤害的系数翻倍，且全局伤害 ×1.15。',
+    capstoneDesc: '【大成 · 踏雪无痕】移速再 +12%，全局伤害再 ×1.28。',
+    apply: (p, lv) => {
+      p.stats.momentum += 1;
+      p.stats.speed *= 1.06;
+      if (lv >= 3 && !p.stats.midMomentum) {
+        p.stats.midMomentum = true;
+        p.stats.momentum += 1;
+        p.stats.dmgMul *= 1.15;
+      }
+      if (lv >= 6 && !p.stats.capMomentum) {
+        p.stats.capMomentum = true;
+        p.stats.speed *= 1.12;
+        p.stats.dmgMul *= 1.28;
+      }
+    },
   },
   {
     id: 'pinball_master', name: '巨灵神之掌 · 崩撞', type: 'special', archetype: 'billiard', archPts: 2, maxLv: 8, midLv: 4,
