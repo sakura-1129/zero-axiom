@@ -19,6 +19,7 @@ const Game = {
   rawH: 800,
   forceLandscape: false,
   isMobileLandscape: false,
+  isMobile: false,
   cssW: 1200,
   cssH: 800,
   viewScale: 1,
@@ -310,6 +311,31 @@ const Game = {
   },
 };
 
+/* 移动端渲染性能分档：玩法数值不变，只压缩画布像素与表现开销 */
+const PERF = {
+  mobile: false,
+  dprCap: 2,
+  maxEnemies: CFG.maxEnemies,
+  maxBullets: CFG.maxBullets,
+  maxEBullets: 320,
+  maxParticles: 640,
+  maxTexts: 140,
+  hpNumbers: true,
+};
+
+function detectMobileViewport(w, h) {
+  try {
+    const nav = typeof navigator !== 'undefined' ? navigator : null;
+    const hasTouch = !!(nav && nav.maxTouchPoints > 0) ||
+      (typeof window !== 'undefined' && 'ontouchstart' in window);
+    const coarse = !!(typeof window !== 'undefined' && window.matchMedia &&
+      window.matchMedia('(pointer: coarse)').matches);
+    return (hasTouch || coarse) && Math.min(w, h) <= 820;
+  } catch (_) {
+    return false;
+  }
+}
+
 /* ══════════════ 初始化 ══════════════ */
 function init() {
   const cv = document.getElementById('game');
@@ -340,10 +366,21 @@ function tryLockLandscape() {
 }
 
 function resize() {
-  Game.dpr = Math.min(window.devicePixelRatio || 1, 2);
   const vv = window.visualViewport;
   const rawW = Math.max(1, Math.round((vv && vv.width) ? vv.width : window.innerWidth));
   const rawH = Math.max(1, Math.round((vv && vv.height) ? vv.height : window.innerHeight));
+
+  // 移动端：限制像素密度与实体预算；桌面端保持原有效果
+  Game.isMobile = detectMobileViewport(rawW, rawH);
+  PERF.mobile = Game.isMobile;
+  PERF.dprCap = Game.isMobile ? 1.5 : 2;
+  PERF.maxEnemies = Game.isMobile ? 120 : CFG.maxEnemies;
+  PERF.maxBullets = Game.isMobile ? 240 : CFG.maxBullets;
+  PERF.maxEBullets = Game.isMobile ? 160 : 320;
+  PERF.maxParticles = Game.isMobile ? 260 : 640;
+  PERF.maxTexts = Game.isMobile ? 60 : 140;
+  PERF.hpNumbers = !Game.isMobile;
+  Game.dpr = Math.min(window.devicePixelRatio || 1, PERF.dprCap);
 
   const forceLandscape = rawW < rawH && rawW <= 768;
   const stageW = forceLandscape ? rawH : rawW;
@@ -368,6 +405,7 @@ function resize() {
     if (root && root.classList) {
       root.classList.toggle('force-landscape', forceLandscape);
       root.classList.toggle('mobile-landscape', isMobileLandscape);
+      root.classList.toggle('mobile-perf', Game.isMobile);
     }
     if (root && root.style && root.style.setProperty) {
       root.style.setProperty('--stage-w', stageW + 'px');
@@ -1792,7 +1830,7 @@ function triggerOrbSkill() {
 }
 
 function spawnBullet(x, y, ang, opt) {
-  if (Game.bullets.length >= CFG.maxBullets) return null;
+  if (Game.bullets.length >= PERF.maxBullets) return null;
   const p = Game.player;
   const s = p.stats;
   const o = opt || {};
@@ -2472,7 +2510,7 @@ function offscreenPos() {
 function spawnEnemyRaw(key, x, y, mul, extra) {
   const t = CFG.enemies[key];
   if (!t) return null;
-  if (Game.enemies.length >= CFG.maxEnemies && key !== 'boss') return null;
+  if (Game.enemies.length >= PERF.maxEnemies && key !== 'boss') return null;
 
   const d = getDifficulty();
   const opts = extra || {};
@@ -2556,7 +2594,7 @@ function updateSpawner(dt) {
   Game.spawnAcc += spawnRateAt(Game.time) * dt;
   while (Game.spawnAcc >= 1) {
     Game.spawnAcc -= 1;
-    if (Game.enemies.length >= CFG.maxEnemies) { Game.spawnAcc = 0; break; }
+    if (Game.enemies.length >= PERF.maxEnemies) { Game.spawnAcc = 0; break; }
     spawnEnemy(pickEnemyType(Game.time));
   }
 
@@ -3102,7 +3140,7 @@ function hurtPlayer(e) {
 
 /* ══════════════ 敌方子弹 ══════════════ */
 function spawnEBullet(x, y, ang, sp, dmg, color) {
-  if (Game.ebullets.length > 320) return;
+  if (Game.ebullets.length >= PERF.maxEBullets) return;
   Game.ebullets.push({
     x: x, y: y,
     vx: Math.cos(ang) * sp,
@@ -3878,7 +3916,7 @@ function applyPickup(it) {
 
 /* ══════════════ 特效 ══════════════ */
 function addParticle(x, y, vx, vy, r, color, life, shape, rot, vRot) {
-  if (Game.particles.length > 640) return;
+  if (Game.particles.length >= PERF.maxParticles) return;
   Game.particles.push({
     x: x, y: y, vx: vx, vy: vy,
     r: r,
@@ -3892,7 +3930,7 @@ function addParticle(x, y, vx, vy, r, color, life, shape, rot, vRot) {
 }
 
 function addText(x, y, str, color, size, opt) {
-  if (Game.texts.length > 140) return;
+  if (Game.texts.length >= PERF.maxTexts) return;
   const o = opt || {};
   const life = o.life || 0.78;
   Game.texts.push({
@@ -4290,6 +4328,14 @@ function renderMenu(ctx) {
 function drawWorld(ctx) {
   const p = Game.player;
 
+  /* 视口剔除：屏幕外的实体不再绘制，满场时显著减少绘制调用 */
+  const cullPad = 90;
+  const cullL = Game.cam.x - Game.W / 2 - cullPad;
+  const cullR = Game.cam.x + Game.W / 2 + cullPad;
+  const cullT = Game.cam.y - Game.H / 2 - cullPad;
+  const cullB = Game.cam.y + Game.H / 2 + cullPad;
+  const inView = (x, y, r) => x + r >= cullL && x - r <= cullR && y + r >= cullT && y - r <= cullB;
+
   /* 几何信标（地面层） */
   drawBeacons(ctx);
 
@@ -4518,6 +4564,7 @@ function drawWorld(ctx) {
   for (let i = 0; i < Game.enemies.length; i++) {
     const e = Game.enemies[i];
     if (e.dead) continue;
+    if (!inView(e.x, e.y, e.r + 48)) continue;
     const col = e.flash > 0 ? '#FFFFFF' : e.color;
     const stroke = e.flash > 0 ? e.color : (e.golden ? '#111315' : shade(e.color, -0.25));
 
@@ -4590,7 +4637,7 @@ function drawWorld(ctx) {
     } else {
       Render.hpRing(ctx, { x: ex, y: ey, r: e.r, hp: e.hp, maxHp: e.maxHp });
     }
-    if (e.flash <= 0) Render.hpNumber(ctx, { x: ex, y: ey, r: e.r, hp: e.hp });
+    if (e.flash <= 0 && PERF.hpNumbers) Render.hpNumber(ctx, { x: ex, y: ey, r: e.r, hp: e.hp });
   }
 
   /* 环绕卫星轨道与球体 */
@@ -4653,6 +4700,7 @@ function drawWorld(ctx) {
   /* 玩家子弹（体积、拖尾与外环随伤害量级阶跃进化） */
   for (let i = 0; i < Game.bullets.length; i++) {
     const b = Game.bullets[i];
+    if (!inView(b.x, b.y, 90)) continue;
     const magTier = b.dmg >= 100000 ? 4 : b.dmg >= 10000 ? 3 : b.dmg >= 1000 ? 2 : b.dmg >= 100 ? 1 : 0;
     const visR = b.r + magTier * 1.05;
     const trailSec = 0.022 + magTier * 0.0055;
@@ -4714,15 +4762,18 @@ function drawWorld(ctx) {
 
     const strokeCol = b.crit ? '#111315' : shade(b.color, -0.28);
     Render.drawBall(ctx, b.x, b.y, visR, b.color, strokeCol);
-    const numCol = (b.crit || b.color === '#FFB800') ? '#111315' : '#ffffff';
-    const bStr = fmt(b.dmg);
-    const bFont = bStr.length >= 4 ? Math.max(7.5, visR * 0.78) : bStr.length >= 3 ? Math.max(8.5, visR * 0.94) : Math.max(9.5, visR * 1.15);
-    Render.text(ctx, bStr, b.x, b.y, bFont, numCol, null, 800);
+    if (!PERF.mobile) {
+      const numCol = (b.crit || b.color === '#FFB800') ? '#111315' : '#ffffff';
+      const bStr = fmt(b.dmg);
+      const bFont = bStr.length >= 4 ? Math.max(7.5, visR * 0.78) : bStr.length >= 3 ? Math.max(8.5, visR * 0.94) : Math.max(9.5, visR * 1.15);
+      Render.text(ctx, bStr, b.x, b.y, bFont, numCol, null, 800);
+    }
   }
 
   /* 敌方子弹 */
   for (let i = 0; i < Game.ebullets.length; i++) {
     const b = Game.ebullets[i];
+    if (!inView(b.x, b.y, 40)) continue;
     Render.drawBall(ctx, b.x, b.y, b.r, '#ffffff', b.color);
     ctx.beginPath();
     ctx.arc(b.x, b.y, b.r * 0.55, 0, TAU);
@@ -4741,6 +4792,7 @@ function drawWorld(ctx) {
   /* 粒子 */
   for (let i = 0; i < Game.particles.length; i++) {
     const q = Game.particles[i];
+    if (!inView(q.x, q.y, 40)) continue;
     const a = clamp(q.life / q.max, 0, 1);
     ctx.globalAlpha = a;
     ctx.fillStyle = q.color;
@@ -4892,6 +4944,7 @@ function drawWorld(ctx) {
   /* 飘字（高对比度瑞士排版 + 暴击弹性放大跃动） */
   for (let i = 0; i < Game.texts.length; i++) {
     const t = Game.texts[i];
+    if (!inView(t.x, t.y, 80)) continue;
     const prog = clamp(1 - t.life / t.max, 0, 1);
     const alpha = prog < 0.58 ? 1 : clamp((1 - prog) / 0.42, 0, 1);
     const pop = t.crit
