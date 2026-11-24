@@ -7,6 +7,8 @@ const Render = {
   _grain: null,
   _vignette: null,
   _vigKey: '',
+  _paper: null,
+  _paperKey: '',
 
   /**
    * 让主画布的 fillStyle / strokeStyle 自动走显示调色板。
@@ -120,7 +122,11 @@ const Render = {
   /** 利落现代无衬线数字 */
   text(ctx, str, x, y, size, fill, stroke, weight) {
     size = Math.round(size * 2) / 2;
-    ctx.font = (weight || 700) + ' ' + size + 'px "Inter", "Helvetica Neue", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif';
+    const font = (weight || 700) + ' ' + size + 'px "Inter", "Helvetica Neue", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei", sans-serif';
+    if (ctx.__renderFont !== font) {
+      ctx.__renderFont = font;
+      ctx.font = font;
+    }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     if (stroke) {
@@ -194,28 +200,52 @@ const Render = {
     return this._grain;
   },
 
+  /** 纸面底图（渐变 + 颗粒）预渲染缓存，仅在尺寸变化时重建 */
+  paper(W, H) {
+    try {
+      const cv = document.createElement('canvas');
+      cv.width = W;
+      cv.height = H;
+      const c = cv.getContext('2d');
+      if (!c || !c.createRadialGradient) return null;
+      const g = c.createRadialGradient(W * 0.5, H * 0.46, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.8);
+      g.addColorStop(0, '#F7F5EF');
+      g.addColorStop(0.65, '#F0EDE4');
+      g.addColorStop(1, '#E6E2D7');
+      c.fillStyle = g;
+      c.fillRect(0, 0, W, H);
+      const gr = this.grain();
+      if (gr && c.createPattern) {
+        const pat = c.createPattern(gr, 'repeat');
+        if (pat) {
+          c.fillStyle = pat;
+          c.fillRect(0, 0, W, H);
+        }
+      }
+      return cv;
+    } catch (err) {
+      return null;
+    }
+  },
+
   /** 瑞士建筑制图纸网格背景（屏幕空间） */
   background(ctx, cam, W, H) {
-    const g = ctx.createRadialGradient(W * 0.5, H * 0.46, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.8);
-    g.addColorStop(0, '#F7F5EF');
-    g.addColorStop(0.65, '#F0EDE4');
-    g.addColorStop(1, '#E6E2D7');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+    const isMobile = typeof Game !== 'undefined' && Game.isMobile;
+    const key = W + 'x' + H;
+    if (this._paperKey !== key) {
+      this._paperKey = key;
+      this._paper = this.paper(W, H);
+    }
 
-    // 纸张颗粒（随相机滚动，保持世界锚定）
-    const gr = this.grain();
-    if (gr && ctx.createPattern) {
-      const pat = ctx.createPattern(gr, 'repeat');
-      if (pat) {
-        const gx = ((-cam.x % 160) + 160) % 160;
-        const gy = ((-cam.y % 160) + 160) % 160;
-        ctx.save();
-        ctx.translate(gx - 160, gy - 160);
-        ctx.fillStyle = pat;
-        ctx.fillRect(0, 0, W + 160, H + 160);
-        ctx.restore();
-      }
+    if (this._paper) {
+      ctx.drawImage(this._paper, 0, 0, W, H);
+    } else if (ctx.createRadialGradient) {
+      const g = ctx.createRadialGradient(W * 0.5, H * 0.46, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.8);
+      g.addColorStop(0, '#F7F5EF');
+      g.addColorStop(0.65, '#F0EDE4');
+      g.addColorStop(1, '#E6E2D7');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
     }
 
     const CELL = 64;
@@ -255,8 +285,10 @@ const Render = {
     ctx.lineWidth = 1.25;
     ctx.stroke();
 
-    if (ctx.fillText) {
+    // 手机上省略坐标标注，减少每帧文字绘制
+    if (!isMobile && ctx.fillText) {
       ctx.font = '600 9px "Inter", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif';
+      ctx.__renderFont = null;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillStyle = 'rgba(27, 29, 35, 0.26)';
