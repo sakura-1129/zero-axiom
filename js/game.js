@@ -15,6 +15,13 @@ const Game = {
   canvas: null,
   ctx: null,
   dpr: 1,
+  rawW: 1200,
+  rawH: 800,
+  forceLandscape: false,
+  isMobileLandscape: false,
+  cssW: 1200,
+  cssH: 800,
+  viewScale: 1,
   W: 0,
   H: 0,
   lastTs: 0,
@@ -117,12 +124,15 @@ const Game = {
   },
 
   start() {
+    resetTouchInput();
+    tryLockLandscape();
     resetRun();
     this.state = 'playing';
     UI.showGame();
   },
 
   toTitle() {
+    resetTouchInput();
     this.state = 'menu';
     resetRun();
     this.player = null;
@@ -141,6 +151,7 @@ const Game = {
       return;
     }
     if (this.state === 'playing') {
+      resetTouchInput();
       this.state = 'paused';
       UI.showPause();
     } else if (this.state === 'paused') {
@@ -154,6 +165,7 @@ const Game = {
       return;
     }
     if (this.state !== 'menu' && this.state !== 'playing' && this.state !== 'paused') return;
+    resetTouchInput();
     this.codexReturnState = this.state;
     this.state = 'codex';
     if (UI.showCodex) UI.showCodex(tab);
@@ -174,6 +186,7 @@ const Game = {
   },
 
   openLevelUp() {
+    resetTouchInput();
     const choices = rollSkills(3);
     if (choices.length === 0) {
       this.pendingLevel = 0;
@@ -189,6 +202,7 @@ const Game = {
   },
 
   openRelicChoice() {
+    resetTouchInput();
     const choices = rollRelics(3);
     if (choices.length === 0) {
       this.pendingRelic = 0;
@@ -283,6 +297,7 @@ const Game = {
 
   gameOver(win) {
     if (this.state === 'dead' || this.state === 'win') return;
+    resetTouchInput();
     this.state = win ? 'win' : 'dead';
     saveRecord();
     if (typeof Analytics !== 'undefined') {
@@ -303,6 +318,10 @@ function init() {
   if (Render.install) Render.install(Game.ctx);
   resize();
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  if (window.visualViewport && window.visualViewport.addEventListener) {
+    window.visualViewport.addEventListener('resize', resize);
+  }
   bindInput();
   loadRecord();
   UI.init();
@@ -311,16 +330,75 @@ function init() {
   requestAnimationFrame(loop);
 }
 
+function tryLockLandscape() {
+  try {
+    if (typeof screen !== 'undefined' && screen.orientation && screen.orientation.lock) {
+      const p = screen.orientation.lock('landscape');
+      if (p && p.catch) p.catch(function () {});
+    }
+  } catch (_) {}
+}
+
 function resize() {
   Game.dpr = Math.min(window.devicePixelRatio || 1, 2);
-  Game.W = window.innerWidth;
-  Game.H = window.innerHeight;
+  const vv = window.visualViewport;
+  const rawW = Math.max(1, Math.round((vv && vv.width) ? vv.width : window.innerWidth));
+  const rawH = Math.max(1, Math.round((vv && vv.height) ? vv.height : window.innerHeight));
+
+  const forceLandscape = rawW < rawH && rawW <= 768;
+  const stageW = forceLandscape ? rawH : rawW;
+  const stageH = forceLandscape ? rawW : rawH;
+  const isMobileLandscape = forceLandscape || (stageH <= 560 && stageW > stageH);
+
+  Game.rawW = rawW;
+  Game.rawH = rawH;
+  Game.forceLandscape = forceLandscape;
+  Game.isMobileLandscape = isMobileLandscape;
+  Game.cssW = stageW;
+  Game.cssH = stageH;
+
+  // Desktop 1200x800 -> scale = 1; Mobile landscape 844x390 -> scale = 0.65 (world ~1298x600)
+  const scale = clamp(Math.min(1, stageW / 960, stageH / 600), 0.54, 1);
+  Game.viewScale = scale;
+  Game.W = Math.round(stageW / scale);
+  Game.H = Math.round(stageH / scale);
+
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement;
+    if (root && root.classList) {
+      root.classList.toggle('force-landscape', forceLandscape);
+      root.classList.toggle('mobile-landscape', isMobileLandscape);
+    }
+    if (root && root.style && root.style.setProperty) {
+      root.style.setProperty('--stage-w', stageW + 'px');
+      root.style.setProperty('--stage-h', stageH + 'px');
+    }
+    const stage = document.getElementById('stage');
+    if (stage && stage.style) {
+      if (forceLandscape) {
+        stage.style.width = stageW + 'px';
+        stage.style.height = stageH + 'px';
+        stage.style.left = rawW + 'px';
+        stage.style.top = '0px';
+        stage.style.transformOrigin = '0 0';
+        stage.style.transform = 'rotate(90deg)';
+      } else {
+        stage.style.width = '100%';
+        stage.style.height = '100%';
+        stage.style.left = '0px';
+        stage.style.top = '0px';
+        stage.style.transformOrigin = '';
+        stage.style.transform = '';
+      }
+    }
+  }
+
   const cv = Game.canvas;
   if (!cv) return;
-  cv.width = Math.floor(Game.W * Game.dpr);
-  cv.height = Math.floor(Game.H * Game.dpr);
-  cv.style.width = Game.W + 'px';
-  cv.style.height = Game.H + 'px';
+  cv.width = Math.floor(stageW * Game.dpr);
+  cv.height = Math.floor(stageH * Game.dpr);
+  cv.style.width = stageW + 'px';
+  cv.style.height = stageH + 'px';
 }
 
 function bindInput() {
@@ -361,7 +439,140 @@ function bindInput() {
 
   window.addEventListener('blur', function () {
     for (const k in keys) keys[k] = false;
+    resetTouchInput();
   });
+
+  bindTouchInput();
+}
+
+const touchInput = {
+  active: false,
+  pointerId: null,
+  originX: 0,
+  originY: 0,
+  dx: 0,
+  dy: 0,
+  maxRadius: 50,
+  deadzone: 5,
+};
+
+function resetTouchInput() {
+  touchInput.active = false;
+  touchInput.pointerId = null;
+  touchInput.dx = 0;
+  touchInput.dy = 0;
+  const vjoy = typeof document !== 'undefined' ? document.getElementById('vjoy') : null;
+  if (vjoy) vjoy.classList.add('hidden');
+}
+
+function updateVjoyVisual(cx, cy, kx, ky) {
+  if (typeof document === 'undefined') return;
+  const vjoy = document.getElementById('vjoy');
+  const base = document.getElementById('vjoyBase');
+  const knob = document.getElementById('vjoyKnob');
+  if (!vjoy || !base || !knob) return;
+  vjoy.classList.remove('hidden');
+  base.style.left = cx + 'px';
+  base.style.top = cy + 'px';
+  knob.style.transform = `translate(${kx}px, ${ky}px)`;
+}
+
+function toStagePoint(e) {
+  if (Game.forceLandscape) {
+    return {
+      x: e.clientY,
+      y: Game.rawW - e.clientX,
+    };
+  }
+  return {
+    x: e.clientX,
+    y: e.clientY,
+  };
+}
+
+function bindTouchInput() {
+  if (typeof document === 'undefined') return;
+  const dashbox = document.getElementById('dashbox');
+  if (dashbox) {
+    dashbox.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof Sfx !== 'undefined') Sfx.init();
+      if (Game.state === 'playing') Game.wantDash = true;
+    });
+  }
+
+  const cv = Game.canvas;
+  if (!cv || !cv.addEventListener) return;
+  cv.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse') return;
+    if (Game.state !== 'playing') return;
+    e.preventDefault();
+    if (typeof Sfx !== 'undefined') Sfx.init();
+    if (touchInput.active) {
+      // 双指触控：移动中另一指轻触画布任意处即可释放球体技能
+      if (e.pointerId !== touchInput.pointerId) Game.wantDash = true;
+      return;
+    }
+    const pt = toStagePoint(e);
+    touchInput.active = true;
+    touchInput.pointerId = e.pointerId;
+    touchInput.originX = pt.x;
+    touchInput.originY = pt.y;
+    touchInput.dx = 0;
+    touchInput.dy = 0;
+    updateVjoyVisual(pt.x, pt.y, 0, 0);
+    if (cv.setPointerCapture) {
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+  }, { passive: false });
+
+  function handleTouchMove(e) {
+    if (!touchInput.active || e.pointerId !== touchInput.pointerId) return;
+    if (Game.state !== 'playing') { resetTouchInput(); return; }
+    if (e.preventDefault) e.preventDefault();
+    const pt = toStagePoint(e);
+    let rx = pt.x - touchInput.originX;
+    let ry = pt.y - touchInput.originY;
+    let dist = Math.hypot(rx, ry);
+    const maxR = touchInput.maxRadius;
+    const nx = dist > 0 ? rx / dist : 0;
+    const ny = dist > 0 ? ry / dist : 0;
+    if (dist > maxR) {
+      touchInput.originX = pt.x - nx * maxR;
+      touchInput.originY = pt.y - ny * maxR;
+      dist = maxR;
+    }
+    const clamped = Math.min(dist, maxR);
+    updateVjoyVisual(touchInput.originX, touchInput.originY, nx * clamped, ny * clamped);
+    if (dist < touchInput.deadzone) {
+      touchInput.dx = 0;
+      touchInput.dy = 0;
+    } else {
+      const mag = clamp((dist - touchInput.deadzone) / 18, 0.25, 1);
+      touchInput.dx = nx * mag;
+      touchInput.dy = ny * mag;
+    }
+  }
+
+  function endTouch(e) {
+    if (!touchInput.active || e.pointerId !== touchInput.pointerId) return;
+    resetTouchInput();
+  }
+
+  cv.addEventListener('pointermove', handleTouchMove, { passive: false });
+  cv.addEventListener('pointerup', endTouch);
+  cv.addEventListener('pointercancel', endTouch);
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('pointermove', handleTouchMove, { passive: false });
+    window.addEventListener('pointerup', endTouch);
+    window.addEventListener('pointercancel', endTouch);
+  }
+  if (document.addEventListener) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) resetTouchInput();
+    });
+  }
 }
 
 function loadRecord() {
@@ -1124,8 +1335,12 @@ function updatePlayer(dt) {
   if (keys['d'] || keys['arrowright']) ax += 1;
   if (keys['w'] || keys['arrowup']) ay -= 1;
   if (keys['s'] || keys['arrowdown']) ay += 1;
+  if (touchInput.active) {
+    ax += touchInput.dx;
+    ay += touchInput.dy;
+  }
   const len = Math.sqrt(ax * ax + ay * ay);
-  if (len > 0) { ax /= len; ay /= len; }
+  if (len > 1) { ax /= len; ay /= len; }
 
   // 主动技能充能恢复
   const effectiveCd = p.beaconBuffT > 0 ? Math.min(0.25, s.dashCd) : s.dashCd;
@@ -4018,8 +4233,12 @@ function render() {
   if (!ctx) return;
   const W = Game.W;
   const H = Game.H;
+  const cv = Game.canvas;
+  const eff = Game.dpr * (Game.viewScale || 1);
+  const tx = (cv && cv.width && W) ? (cv.width / W) : eff;
+  const ty = (cv && cv.height && H) ? (cv.height / H) : eff;
 
-  ctx.setTransform(Game.dpr, 0, 0, Game.dpr, 0, 0);
+  ctx.setTransform(tx, 0, 0, ty, 0, 0);
   ctx.clearRect(0, 0, W, H);
 
   if (Game.state === 'menu' || !Game.player) {
@@ -4731,6 +4950,11 @@ function drawBeacons(ctx) {
 }
 
 function drawBeaconIndicators(ctx, W, H) {
+  const vs = Game.viewScale || 1;
+  const isML = !!Game.isMobileLandscape;
+  const padX = isML ? Math.round(32 / vs) : 34;
+  const padTop = isML ? Math.round(56 / vs) : 34;
+  const padBot = isML ? Math.round(56 / vs) : 34;
   for (let i = 0; i < Game.beacons.length; i++) {
     const b = Game.beacons[i];
     if (b.dead) continue;
@@ -4739,9 +4963,8 @@ function drawBeaconIndicators(ctx, W, H) {
     if (sx >= 24 && sx <= W - 24 && sy >= 24 && sy <= H - 24) continue;
 
     const ang = Math.atan2(sy - H / 2, sx - W / 2);
-    const pad = 34;
-    const ix = clamp(sx, pad, W - pad);
-    const iy = clamp(sy, pad, H - pad);
+    const ix = clamp(sx, padX, W - padX);
+    const iy = clamp(sy, padTop, H - padBot);
     const dist = Math.round(Math.hypot(b.x - Game.cam.x, b.y - Game.cam.y));
 
     ctx.save();

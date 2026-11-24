@@ -394,6 +394,13 @@ const UI = {
     if (this.el.screenOver) this.el.screenOver.classList.add('hidden');
   },
 
+  isTouch() {
+    if (typeof Game !== 'undefined' && Game.isMobileLandscape) return true;
+    if (typeof window === 'undefined') return false;
+    if (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) return true;
+    return Math.min(window.innerWidth, window.innerHeight) <= 560;
+  },
+
   showGame() {
     this.hideAllScreens();
     this.el.hud.classList.remove('hidden');
@@ -404,11 +411,19 @@ const UI = {
     const orb = typeof getOrb === 'function' ? getOrb() : null;
     if (orb && this.el.dashLabel) this.el.dashLabel.textContent = orb.skillKeyLabel;
     if (orb && this.el.dashbox) this.el.dashbox.style.setProperty('--accent', palCol(orb.ringColor));
+    const vjoy = typeof document !== 'undefined' ? document.getElementById('vjoy') : null;
+    if (orb && vjoy && vjoy.style && vjoy.style.setProperty) {
+      vjoy.style.setProperty('--accent', palCol(orb.ringColor));
+    }
 
     // 重播开局操作提示
     const tip = this.el.tip;
     if (tip) {
-      if (orb) tip.textContent = 'WASD 移动 · 自动射击 · 空格 ' + orb.skillName;
+      if (orb) {
+        tip.textContent = this.isTouch()
+          ? ('左半屏滑动移动 · 自动射击 · 右下角或双指 ' + orb.skillName)
+          : ('WASD 移动 · 自动射击 · 空格 ' + orb.skillName);
+      }
       tip.style.animation = 'none';
       void tip.offsetWidth;
       tip.style.animation = 'tipFade 4.5s ease-out forwards';

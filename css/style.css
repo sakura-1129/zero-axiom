@@ -1911,3 +1911,716 @@ h2 {
 @media (max-width: 720px) {
   .analysis-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ══════════ 移动端横屏与自动强制横屏适配 ══════════ */
+:root {
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+}
+
+html.force-landscape {
+  --safe-t: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-right, 0px);
+  --safe-l: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#stage > canvas#game,
+#stage > #hud,
+#stage > .screen,
+.vjoy {
+  position: absolute;
+  inset: 0;
+}
+
+.vjoy-base {
+  position: absolute;
+}
+
+.notice-panel {
+  position: absolute;
+}
+
+#game {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.screen, .panel, .modal-card, .codex-body, .history-list {
+  touch-action: manipulation;
+  overscroll-behavior: contain;
+}
+
+.dashbox {
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform .1s ease, border-color .14s ease;
+}
+
+.dashbox.ready {
+  border-color: color-mix(in srgb, var(--accent, var(--cobalt)) 55%, var(--line-strong));
+}
+
+.dashbox:active {
+  transform: scale(0.91);
+}
+
+.vjoy {
+  --accent: var(--cobalt);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.vjoy.hidden {
+  display: none;
+}
+
+.vjoy-base {
+  width: 100px;
+  height: 100px;
+  margin-left: -50px;
+  margin-top: -50px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(27, 29, 35, 0.24);
+  background: rgba(255, 254, 251, 0.42);
+  box-shadow: 0 4px 16px rgba(27, 29, 35, 0.08);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vjoy-knob {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent, var(--cobalt));
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 8px rgba(27, 29, 35, 0.20);
+  will-change: transform;
+}
+
+@media (hover: none) {
+  .btn:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn.ghost:hover {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--line-strong);
+  }
+
+  .endless-toggle.active:hover {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  .hud-btn:hover {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+
+  .hud-btn.muted:hover {
+    color: var(--red);
+    border-color: rgba(230, 51, 18, 0.45);
+  }
+
+  .orb-btn:hover,
+  .diff-btn:hover,
+  .card:hover,
+  .combo-card:hover {
+    transform: none;
+  }
+
+  .btn:active,
+  .hud-btn:active,
+  .orb-btn:active,
+  .diff-btn:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .keys,
+  .kb-only {
+    display: none;
+  }
+}
+
+html.mobile-landscape .keys,
+html.mobile-landscape .kb-only {
+  display: none;
+}
+
+/* ── 移动端横屏（物理横屏 + 竖屏自动旋转横屏） ── */
+html.mobile-landscape .screen {
+  justify-content: flex-start;
+  padding: max(8px, var(--safe-t)) max(14px, var(--safe-r)) max(8px, var(--safe-b)) max(14px, var(--safe-l));
+  gap: 10px;
+}
+
+/* ── 局内横屏 HUD ── */
+html.mobile-landscape .hud-tl {
+  top: max(8px, var(--safe-t));
+  left: max(12px, var(--safe-l));
+  width: 192px;
+  padding: 6px 10px;
+}
+
+html.mobile-landscape .hp-meta {
+  font-size: 10.5px;
+  margin-bottom: 3px;
+}
+
+html.mobile-landscape .bar.hp {
+  height: 7px;
+}
+
+html.mobile-landscape .bar.xp {
+  height: 4px;
+  margin-top: 4px;
+}
+
+html.mobile-landscape .xp-meta {
+  margin-top: 4px;
+  font-size: 9.5px;
+}
+
+html.mobile-landscape .core-tier {
+  margin-top: 4px;
+  padding-top: 4px;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.mobile-landscape .hud-tc {
+  top: max(8px, var(--safe-t));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+html.mobile-landscape .clock {
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+html.mobile-landscape .threat {
+  margin-top: 0;
+  padding-top: 0;
+  padding-left: 8px;
+  border-top: none;
+  border-left: 1px solid var(--line);
+  font-size: 9px;
+  letter-spacing: 0.4px;
+}
+
+html.mobile-landscape .hud-tr {
+  top: max(8px, var(--safe-t));
+  right: max(12px, var(--safe-r));
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+}
+
+html.mobile-landscape .hud-tr .kpi {
+  display: block;
+  min-width: 34px;
+}
+
+html.mobile-landscape .hud-tr .kpi b {
+  font-size: 14px;
+}
+
+html.mobile-landscape .hud-tr .kpi span {
+  font-size: 8.5px;
+  letter-spacing: 0.8px;
+}
+
+html.mobile-landscape .hud-actions {
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+  gap: 5px;
+}
+
+html.mobile-landscape .hud-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
+}
+
+html.mobile-landscape .bossbar {
+  top: calc(max(8px, var(--safe-t)) + 36px);
+  width: min(340px, 44%);
+  padding: 4px 10px 6px;
+}
+
+html.mobile-landscape .boss-name {
+  font-size: 9.5px;
+  margin-bottom: 3px;
+  letter-spacing: 1.5px;
+}
+
+html.mobile-landscape .dock {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  bottom: max(8px, var(--safe-b));
+  max-width: calc(100% - 240px);
+  justify-content: center;
+  gap: 5px;
+}
+
+html.mobile-landscape .dock .chip {
+  width: 30px;
+  height: 30px;
+}
+
+html.mobile-landscape .dock .chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+html.mobile-landscape .dock .chip .n {
+  min-width: 13px;
+  height: 13px;
+  font-size: 8px;
+  right: -3px;
+  bottom: -3px;
+  padding: 0 2px;
+}
+
+html.mobile-landscape .dashbox {
+  width: 68px;
+  height: 68px;
+  right: max(18px, var(--safe-r));
+  bottom: max(14px, var(--safe-b));
+}
+
+html.mobile-landscape .dashbox span {
+  font-size: 11px;
+}
+
+html.mobile-landscape .dash-charges {
+  min-width: 20px;
+  height: 20px;
+  font-size: 10.5px;
+}
+
+html.mobile-landscape .tip {
+  display: block;
+  bottom: calc(max(8px, var(--safe-b)) + 44px);
+  font-size: 10.5px;
+  padding: 4px 12px;
+  letter-spacing: 0.8px;
+  max-width: 76%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 标题页双栏横屏驾驶舱 ── */
+html.mobile-landscape .title-panel {
+  max-width: 820px;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  margin: auto 0;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1.12fr 1fr;
+  column-gap: 14px;
+  row-gap: 8px;
+  align-items: start;
+}
+
+html.mobile-landscape .title-panel .swiss-meta {
+  display: none;
+}
+
+html.mobile-landscape .brand {
+  grid-column: 1;
+  grid-row: 1;
+  gap: 10px;
+  padding: 0;
+}
+
+html.mobile-landscape .brand-mark {
+  width: 38px;
+  height: 38px;
+}
+
+html.mobile-landscape .brand-ball {
+  width: 20px;
+  height: 20px;
+}
+
+html.mobile-landscape .brand-dot {
+  width: 7px;
+  height: 7px;
+  top: 5px;
+  right: 5px;
+}
+
+html.mobile-landscape h1 {
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+html.mobile-landscape .tag {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+}
+
+html.mobile-landscape .lead {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+html.mobile-landscape .orb-block {
+  grid-column: 1;
+  grid-row: 2 / 4;
+  gap: 5px;
+}
+
+html.mobile-landscape .orb-grid {
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+html.mobile-landscape .orb-btn {
+  padding: 6px 10px;
+  gap: 2px;
+}
+
+html.mobile-landscape .orb-swatch {
+  width: 18px;
+  height: 18px;
+}
+
+html.mobile-landscape .orb-title-wrap {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
+
+html.mobile-landscape .orb-name {
+  font-size: 12.5px;
+}
+
+html.mobile-landscape .orb-skill {
+  font-size: 9.5px;
+}
+
+html.mobile-landscape .orb-desc {
+  font-size: 9.5px;
+  line-height: 1.3;
+}
+
+html.mobile-landscape .diff-block {
+  grid-column: 2;
+  grid-row: 2;
+  gap: 5px;
+}
+
+html.mobile-landscape .diff-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+html.mobile-landscape .diff-btn {
+  padding: 6px 7px 7px;
+  gap: 2px;
+}
+
+html.mobile-landscape .diff-code {
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+html.mobile-landscape .diff-name {
+  font-size: 13px;
+}
+
+html.mobile-landscape .diff-desc {
+  font-size: 9px;
+  line-height: 1.28;
+}
+
+html.mobile-landscape .title-foot {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: end;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+html.mobile-landscape .title-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+
+html.mobile-landscape #btnStart {
+  grid-column: 1 / -1;
+  padding: 9px 14px;
+  font-size: 13.5px;
+}
+
+html.mobile-landscape .title-actions .btn.ghost {
+  padding: 6px 4px;
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+html.mobile-landscape .record {
+  font-size: 9.5px;
+  text-align: center;
+}
+
+html.mobile-landscape .notice-panel {
+  position: static;
+  width: 100%;
+  max-width: 820px;
+  max-height: none;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* ── 升级 / 遗物三卡并排横屏选卡 ── */
+html.mobile-landscape #screenLevel {
+  gap: 6px;
+}
+
+html.mobile-landscape .lv-head {
+  min-width: 0;
+  width: min(820px, 100%);
+  margin-top: auto;
+  padding-bottom: 4px;
+}
+
+html.mobile-landscape .lv-title {
+  font-size: 9px;
+  letter-spacing: 4px;
+}
+
+html.mobile-landscape .lv-sub {
+  font-size: 15px;
+  margin-top: 2px;
+}
+
+html.mobile-landscape .cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: min(820px, 100%);
+}
+
+html.mobile-landscape .card {
+  width: auto;
+  min-height: 0;
+  padding: 9px 11px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+html.mobile-landscape .card:active {
+  transform: scale(0.98);
+}
+
+html.mobile-landscape .card-icon {
+  width: 30px;
+  height: 30px;
+  margin: 5px 0 4px;
+}
+
+html.mobile-landscape .card-name {
+  font-size: 14px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+html.mobile-landscape .card-arch,
+html.mobile-landscape .card-synergy {
+  margin-bottom: 4px;
+  padding: 2px 6px;
+  font-size: 9.5px;
+}
+
+html.mobile-landscape .card-pips {
+  margin-bottom: 5px;
+  gap: 3px;
+}
+
+html.mobile-landscape .card-delta {
+  margin-bottom: 4px;
+  padding: 1px 6px;
+  font-size: 9.5px;
+}
+
+html.mobile-landscape .card-desc {
+  font-size: 11px;
+  line-height: 1.38;
+}
+
+html.mobile-landscape .card-cap {
+  margin-top: 5px;
+  padding: 4px 7px;
+  font-size: 9.5px;
+  line-height: 1.32;
+}
+
+html.mobile-landscape .lv-foot {
+  margin-bottom: auto;
+  font-size: 10px;
+}
+
+/* ── 横屏弹窗（暂停 / 图鉴 / 结算 / 战绩） ── */
+html.mobile-landscape .modal-card {
+  margin: auto 0;
+  max-width: 720px;
+  width: 100%;
+  max-height: calc(100% - 16px);
+  padding: 11px 16px;
+  gap: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.mobile-landscape .modal-card .swiss-meta {
+  display: none;
+}
+
+html.mobile-landscape h2 {
+  font-size: 18px;
+}
+
+html.mobile-landscape .stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 12px;
+  padding: 8px 12px;
+}
+
+html.mobile-landscape .stats .st b {
+  font-size: 15px;
+}
+
+html.mobile-landscape .stats .st span {
+  font-size: 9px;
+}
+
+html.mobile-landscape .analysis-grid {
+  grid-template-columns: 1.35fr 1fr;
+  gap: 10px;
+}
+
+html.mobile-landscape .radar-svg {
+  width: 132px;
+  height: 124px;
+}
+
+html.mobile-landscape .codex-panel {
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html.mobile-landscape .codex-tabs {
+  gap: 6px;
+  padding-bottom: 6px;
+  flex-shrink: 0;
+}
+
+html.mobile-landscape .codex-tab {
+  flex: 1;
+  text-align: center;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+html.mobile-landscape .codex-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+html.mobile-landscape .combo-grid,
+html.mobile-landscape .arch-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+html.mobile-landscape .history-panel {
+  max-width: 820px;
+}
+
+html.mobile-landscape .history-list {
+  max-height: 130px;
+}
+
+html.mobile-landscape .btn-row {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+html.mobile-landscape .btn-row .btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-align: center;
+}

@@ -10,22 +10,38 @@ const repoRoot = path.resolve(__dirname, '..');
  * Creates an isolated sandbox environment emulating browser globals for headless execution.
  */
 function createGameContext() {
-  const dummyEl = {
+  function makeTarget(extra) {
+    const listeners = Object.create(null);
+    return Object.assign({
+      _listeners: listeners,
+      addEventListener: (type, fn) => {
+        if (!listeners[type]) listeners[type] = [];
+        listeners[type].push(fn);
+      },
+      _emit: (type, ev) => {
+        const list = listeners[type] || [];
+        const e = Object.assign({ preventDefault: () => {}, stopPropagation: () => {} }, ev);
+        for (const fn of list) fn(e);
+      },
+    }, extra);
+  }
+
+  const dummyEl = makeTarget({
     style: { setProperty: () => {} },
     classList: { add: () => {}, remove: () => {}, toggle: () => {} },
-    addEventListener: () => {},
     querySelectorAll: () => [],
     setAttribute: () => {},
     dataset: {},
     textContent: '',
     innerHTML: '',
     onclick: null,
-  };
+  });
 
-  const dummyCanvas = {
+  const dummyCanvas = makeTarget({
     style: {},
     width: 1200,
     height: 800,
+    setPointerCapture: () => {},
     getContext: () => ({
       scale: () => {},
       save: () => {},
@@ -48,7 +64,7 @@ function createGameContext() {
       strokeText: () => {},
       rotate: () => {},
     }),
-  };
+  });
 
   const memStore = new Map();
   const mockStorage = {
@@ -56,6 +72,38 @@ function createGameContext() {
     setItem: (k, v) => { memStore.set(k, String(v)); },
     removeItem: (k) => { memStore.delete(k); },
   };
+  const winObj = makeTarget({
+    innerWidth: 1200,
+    innerHeight: 800,
+    devicePixelRatio: 1,
+    requestAnimationFrame: () => 1,
+    localStorage: mockStorage,
+    AudioContext: function () {
+      const param = () => ({ value: 0, setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} });
+      return {
+        currentTime: 0,
+        createGain: () => ({ gain: param(), connect: () => {} }),
+        createOscillator: () => ({ type: 'sine', frequency: param(), connect: () => {}, start: () => {}, stop: () => {} }),
+        destination: {},
+      };
+    },
+  });
+  const rootEl = makeTarget({
+    style: { setProperty: () => {} },
+    classList: {
+      _set: new Set(),
+      add(c) { this._set.add(c); },
+      remove(c) { this._set.delete(c); },
+      toggle(c, force) {
+        if (force === undefined) {
+          if (this._set.has(c)) this._set.delete(c);
+          else this._set.add(c);
+        } else if (force) this._set.add(c);
+        else this._set.delete(c);
+      },
+      contains(c) { return this._set.has(c); },
+    },
+  });
   const sandbox = {
     Math,
     console,
@@ -71,25 +119,12 @@ function createGameContext() {
     parseInt,
     isFinite,
     setTimeout,
-    window: {
-      innerWidth: 1200,
-      innerHeight: 800,
-      devicePixelRatio: 1,
-      addEventListener: () => {},
-      requestAnimationFrame: () => 1,
-      localStorage: mockStorage,
-      AudioContext: function () {
-        return {
-          createGain: () => ({ gain: { value: 0 }, connect: () => {} }),
-          destination: {},
-        };
-      },
-    },
-    document: {
+    window: winObj,
+    document: makeTarget({
+      documentElement: rootEl,
       getElementById: (id) => (id === 'game' ? dummyCanvas : dummyEl),
       createElement: () => dummyCanvas,
-      addEventListener: () => {},
-    },
+    }),
     localStorage: mockStorage,
     requestAnimationFrame: () => 1,
   };
@@ -158,6 +193,9 @@ function createGameContext() {
       globalThis.rollSkills = rollSkills;
       globalThis.spawnRateAt = spawnRateAt;
       globalThis.pickEnemyType = pickEnemyType;
+      globalThis.resize = resize;
+      globalThis.touchInput = touchInput;
+      globalThis.UI = UI;
       `,
     ctx
   );
@@ -951,6 +989,65 @@ test('17. Playstyle Analytics: Telemetry tracking, 5D Radar, Titles, and History
   assert.strictEqual(career.runs, 25);
   assert.ok(ctx.Analytics.renderRadarSVG(career.scores, '#0055FF').includes('<polygon'));
   assert.ok(ctx.Analytics.renderTrendSVG(hist).includes('<path'));
+});
+
+test('18. Mobile Landscape Adaptation: Auto-Rotated Stage, Native Landscape ViewScale & Rotated Touch Mapping', () => {
+  const ctx = createGameContext();
+
+  // 1) Desktop keeps 1:1 logical scaling
+  assert.strictEqual(ctx.Game.forceLandscape, false);
+  assert.strictEqual(ctx.Game.isMobileLandscape, false);
+  assert.strictEqual(ctx.Game.viewScale, 1);
+  assert.strictEqual(ctx.Game.W, 1200);
+  assert.strictEqual(ctx.Game.H, 800);
+
+  // 2) Native mobile landscape (844x390) scales world to wide landscape view
+  ctx.window.innerWidth = 844;
+  ctx.window.innerHeight = 390;
+  ctx.resize();
+  assert.strictEqual(ctx.Game.forceLandscape, false);
+  assert.strictEqual(ctx.Game.isMobileLandscape, true);
+  assert.strictEqual(ctx.Game.viewScale, 0.65);
+  assert.ok(ctx.Game.W >= 1290, `Landscape logical width >= 1290, got ${ctx.Game.W}`);
+  assert.strictEqual(ctx.Game.H, 600);
+  assert.strictEqual(ctx.Game.canvas.style.width, '844px');
+  assert.strictEqual(ctx.Game.canvas.style.height, '390px');
+
+  // 3) Portrait phone (390x844) auto-rotates stage into 844x390 forced landscape
+  ctx.window.innerWidth = 390;
+  ctx.window.innerHeight = 844;
+  ctx.resize();
+  assert.strictEqual(ctx.Game.forceLandscape, true);
+  assert.strictEqual(ctx.Game.isMobileLandscape, true);
+  assert.strictEqual(ctx.Game.cssW, 844);
+  assert.strictEqual(ctx.Game.cssH, 390);
+  assert.ok(ctx.Game.W >= 1290, `Forced landscape logical width >= 1290, got ${ctx.Game.W}`);
+  assert.strictEqual(ctx.Game.H, 600);
+  assert.strictEqual(ctx.Game.canvas.style.width, '844px');
+  assert.strictEqual(ctx.Game.canvas.style.height, '390px');
+
+  // 4) Rotated touch mapping: dragging along +clientY moves right (+X) in rotated landscape stage
+  ctx.Game.start();
+  ctx.Game.canvas._emit('pointerdown', { pointerType: 'touch', pointerId: 1, clientX: 100, clientY: 120 });
+  assert.strictEqual(ctx.touchInput.active, true);
+  assert.strictEqual(ctx.touchInput.originX, 120);
+  assert.strictEqual(ctx.touchInput.originY, 290);
+  ctx.Game.canvas._emit('pointermove', { pointerType: 'touch', pointerId: 1, clientX: 100, clientY: 200 });
+  assert.strictEqual(ctx.touchInput.originX, 150, 'Joystick origin leashes at maxRadius (50) in rotated space');
+  assert.ok(ctx.touchInput.dx > 0.9, `Joystick dx should approach 1.0, got ${ctx.touchInput.dx}`);
+  assert.ok(Math.abs(ctx.touchInput.dy) < 0.01, `Joystick dy should stay ~0, got ${ctx.touchInput.dy}`);
+  ctx.update(0.1);
+  assert.ok(ctx.Game.player.x > 0, `Player should move right on touch drag, got x=${ctx.Game.player.x}`);
+
+  // 5) Second-finger tap triggers orb skill / dash while steering
+  ctx.Game.wantDash = false;
+  ctx.Game.canvas._emit('pointerdown', { pointerType: 'touch', pointerId: 2, clientX: 200, clientY: 700 });
+  assert.strictEqual(ctx.Game.wantDash, true, 'Second finger tap triggers orb skill');
+
+  // 6) Opening level-up resets active touch input cleanly
+  ctx.Game.openLevelUp();
+  assert.strictEqual(ctx.touchInput.active, false);
+  assert.strictEqual(ctx.touchInput.dx, 0);
 });
 
 
